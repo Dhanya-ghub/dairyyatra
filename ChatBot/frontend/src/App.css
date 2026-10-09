@@ -1,0 +1,846 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --navy: #0a192f;
+  --navy-2: #162b46;
+  --cream: #fbf7ee;
+  --cream-2: #f3ead8;
+  --gold: #c9a45c;
+  --gold-light: #ead8b2;
+  --text: #273342;
+  --muted: #78808b;
+  --border: #e4d9c5;
+}
+
+/* RESET */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+/* =========================================================
+   OUTER PAGE
+   ========================================================= */
+
+.dy-app {
+  min-height: 100svh;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px 20px;
+
+  /*
+    IMPORTANT:
+    NO bot background here.
+    This keeps the outside clean.
+  */
+
+  background: #eee7d8;
+
+  font-family: "Work Sans", sans-serif;
+  color: var(--text);
+}
+
+/* =========================================================
+   CHATBOT WINDOW
+   ========================================================= */
+
+.dy-shell {
+  width: min(760px, 100%);
+  height: min(760px, 92vh);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: var(--cream);
+
+  border-radius: 22px;
+
+  border: 1px solid rgba(10, 25, 47, 0.12);
+
+  box-shadow:
+    0 30px 70px rgba(10, 25, 47, 0.18),
+    0 8px 20px rgba(10, 25, 47, 0.08);
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.dy-header {
+  position: relative;
+  background:  #0A192F;
+  color: var(--dy-cream);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dy-header-right {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-left: auto;
+}
+
+.dy-online-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #b8d6bd;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dy-online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+}
+
+.dy-header::after {
+  content: "";
+
+  position: absolute;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  height: 2px;
+
+  background: var(--gold);
+}
+
+/* BRAND */
+
+.dy-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.dy-brand-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: var(--navy);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dy-brand-icon img{
+  width:100%;
+  height: 100%;
+  object-fit:cover;
+  display: block;
+}
+.dy-brand-text h1 {
+  color: #eee9de;
+  font-family: "Lora", serif;
+  font-weight: 600;
+  font-size: 21px;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+.dy-brand-text p {
+  color: #D8E2D9;
+  margin: 2px 0 0;
+  font-size: 13px;
+  opacity: 1;
+}
+
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
+
+.dy-language-container {
+  position: relative;
+}
+
+.dy-language-trigger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 13px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: rgba(255, 255, 255, 0.09);
+
+  color: white;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.dy-language-trigger:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dy-language-trigger svg {
+  transition: transform 0.2s ease;
+}
+
+.dy-language-trigger .rotate {
+  transform: rotate(180deg);
+}
+
+/* DROPDOWN */
+
+.dy-language-menu {
+  position: absolute;
+
+  top: calc(100% + 8px);
+  right: 0;
+
+  width: 145px;
+
+  padding: 6px;
+
+  background: white;
+
+  border: 1px solid var(--border);
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 12px 30px rgba(10, 25, 47, 0.18);
+
+  z-index: 50;
+}
+
+.dy-language-menu button {
+  width: 100%;
+
+  padding: 9px 11px;
+
+  text-align: left;
+
+  border: none;
+
+  background: transparent;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  color: var(--text);
+
+  cursor: pointer;
+}
+
+.dy-language-menu button:hover {
+  background: #f5f0e6;
+}
+
+.dy-language-menu button.selected {
+  background: var(--navy);
+
+  color: white;
+}
+
+/* =========================================================
+   CHAT AREA
+   ========================================================= */
+
+.dy-card {
+  position: relative;
+
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  /*
+    THE IMAGE IS NOW ONLY INSIDE THE CHATBOT.
+  */
+
+  background:
+    linear-gradient(
+      rgba(251, 247, 238, 0.76),
+      rgba(251, 247, 238, 0.82)
+    ),
+    url("/botbg.png");
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-repeat: no-repeat;
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+.dy-messages {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding: 25px 24px 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
+
+  scroll-behavior: smooth;
+}
+
+.dy-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dy-messages::-webkit-scrollbar-thumb {
+  background: rgba(10, 25, 47, 0.18);
+
+  border-radius: 20px;
+}
+
+/* =========================================================
+   MESSAGE ROW
+   ========================================================= */
+
+.dy-row {
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 9px;
+
+  max-width: 80%;
+
+  animation: messageIn 0.2s ease;
+}
+
+.dy-row.bot {
+  align-self: flex-start;
+}
+
+.dy-row.user {
+  align-self: flex-end;
+
+  flex-direction: row-reverse;
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.dy-avatar {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+}
+.dy-avatar.bot {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 2px solid #d8c99f;
+}
+
+.dy-avatar.bot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dy-avatar.user {
+  background: var(--gold-light);
+
+  color: var(--navy);
+}
+
+/* =========================================================
+   BUBBLES
+   ========================================================= */
+
+.dy-bubble {
+  padding: 12px 15px;
+
+  font-size: 14px;
+
+  line-height: 1.55;
+
+  word-break: break-word;
+}
+
+.dy-row.bot .dy-bubble {
+  background: rgba(255, 255, 255, 0.95);
+
+  border: 1px solid var(--border);
+
+  color: var(--text);
+
+  border-radius: 17px 17px 17px 5px;
+
+  box-shadow:
+    0 4px 12px rgba(10, 25, 47, 0.07);
+}
+
+.dy-row.user .dy-bubble {
+  background: var(--navy);
+
+  color: white;
+
+  border-radius: 17px 17px 5px 17px;
+
+  box-shadow:
+    0 4px 12px rgba(10, 25, 47, 0.15);
+}
+
+/* =========================================================
+   QUICK QUESTIONS
+   ========================================================= */
+
+.dy-welcome-helper {
+  margin-left: 39px;
+
+  margin-top: 2px;
+}
+
+.dy-helper-title {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-bottom: 9px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  color: #68717d;
+}
+
+.dy-helper-title svg {
+  color: var(--gold);
+}
+
+.dy-quick-grid {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+}
+
+.dy-quick-grid button {
+  padding: 8px 12px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(10, 25, 47, 0.1);
+
+  background: rgba(255, 255, 255, 0.9);
+
+  color: var(--navy);
+
+  font-family: inherit;
+
+  font-size: 12.5px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.dy-quick-grid button:hover {
+  transform: translateY(-1px);
+
+  border-color: var(--gold);
+
+  background: white;
+}
+
+.dy-quick-grid button:active {
+  transform: scale(0.97);
+}
+
+/* =========================================================
+   TYPING
+   ========================================================= */
+
+.dy-typing {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 13px 15px;
+}
+
+.dy-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--navy);
+
+  opacity: 0.35;
+
+  animation: typing 1s infinite;
+}
+
+.dy-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dy-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+
+    opacity: 0.35;
+  }
+
+  30% {
+    transform: translateY(-4px);
+
+    opacity: 0.9;
+  }
+}
+
+/* =========================================================
+   INPUT AREA
+   ========================================================= */
+
+.dy-input-bar {
+  flex-shrink: 0;
+
+  padding: 13px 18px 17px;
+
+  background: rgba(243, 234, 216, 0.96);
+
+  border-top: 1px solid rgba(10, 25, 47, 0.08);
+}
+
+.dy-input-wrap {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  min-height: 52px;
+
+  padding: 5px 6px 5px 17px;
+
+  background: white;
+
+  border: 1px solid #d5c8b1;
+
+  border-radius: 999px;
+
+  box-shadow:
+    0 4px 12px rgba(10, 25, 47, 0.08);
+
+  transition: 0.2s ease;
+}
+
+.dy-input-wrap:focus-within {
+  border-color: var(--navy);
+
+  box-shadow:
+    0 0 0 3px rgba(10, 25, 47, 0.07);
+}
+
+.dy-input-wrap textarea {
+  flex: 1;
+
+  min-width: 0;
+
+  border: none;
+
+  outline: none;
+
+  resize: none;
+
+  background: transparent;
+
+  padding: 7px 0;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  color: var(--text);
+
+  line-height: 1.4;
+
+  max-height: 90px;
+}
+
+.dy-input-wrap textarea::placeholder {
+  color: #92979c;
+}
+
+/* =========================================================
+   MIC
+   ========================================================= */
+
+.dy-mic,
+.dy-send {
+  width: 39px;
+  height: 39px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.dy-mic {
+  background: transparent;
+
+  color: #697586;
+}
+
+.dy-mic:hover {
+  background: #f1ede5;
+
+  color: var(--navy);
+}
+
+.dy-mic.active {
+  background: #f0dfbb;
+
+  color: #956d24;
+
+  animation: micPulse 1.2s infinite;
+}
+
+@keyframes micPulse {
+  50% {
+    box-shadow: 0 0 0 5px rgba(201, 164, 92, 0.15);
+  }
+}
+
+/* =========================================================
+   SEND
+   ========================================================= */
+
+.dy-send {
+  background: var(--navy);
+
+  color: white;
+}
+
+.dy-send:hover:not(:disabled) {
+  background: var(--navy-2);
+
+  transform: translateY(-1px);
+}
+
+.dy-send:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
+.dy-send:disabled {
+  background: #d7d0c3;
+
+  color: #999287;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   REMOVE OLD FOOTER
+   ========================================================= */
+
+.dy-input-note {
+  display: none !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .dy-app {
+    padding: 0;
+
+    background: #eee7d8;
+  }
+
+  .dy-shell {
+    width: 100%;
+
+    height: 100svh;
+
+    max-width: none;
+
+    border-radius: 0;
+
+    border: none;
+
+    box-shadow: none;
+  }
+
+  .dy-header {
+    height: 74px;
+
+    padding: 0 14px;
+  }
+.dy-brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.dy-brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+  .dy-brand-text h1 {
+    font-size: 16px;
+  }
+
+  .dy-brand-text p {
+    font-size: 10px;
+  }
+
+  .dy-language-trigger {
+    padding: 8px 10px;
+
+    font-size: 11px;
+  }
+
+  .dy-messages {
+    padding: 19px 14px 12px;
+  }
+
+  .dy-row {
+    max-width: 90%;
+  }
+
+  .dy-welcome-helper {
+    margin-left: 0;
+  }
+
+  .dy-quick-grid {
+    max-height: 90px;
+
+    overflow-y: auto;
+  }
+
+  .dy-input-bar {
+    padding: 10px 11px 13px;
+  }
+}
+
+@media (max-width: 430px) {
+  .dy-brand-text p {
+    display: none;
+  }
+
+  .dy-brand-text h1 {
+    font-size: 15px;
+  }
+
+  .dy-language-trigger {
+    max-width: 100px;
+
+    overflow: hidden;
+  }
+
+  .dy-messages {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .dy-bubble {
+    font-size: 13.5px;
+  }
+}

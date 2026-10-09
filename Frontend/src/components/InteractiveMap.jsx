@@ -200,8 +200,8 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
       style={{ overflowX: 'clip' }}
     >
       <span id={altId} className="absolute top-0" aria-hidden="true" />
-      <div className="pointer-events-none absolute right-0 top-0 h-[550px] w-[550px] rounded-full bg-[#f2b134]/15 blur-[140px]" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-[550px] w-[550px] rounded-full bg-[#C8DFDB]/40 blur-[140px]" />
+      <div className="pointer-events-none absolute right-0 top-0 h-[550px] w-[550px] max-w-full rounded-full bg-[#f2b134]/15 blur-[140px]" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-[550px] w-[550px] max-w-full rounded-full bg-[#C8DFDB]/40 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl">
         <ScrollReveal animation="fade-down" duration={700}>
@@ -217,7 +217,7 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
         </ScrollReveal>
 
         {/* The track gives the page room to scroll while the journey stays pinned (large screens) */}
-        <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 28, 200)}vh` }}>
+        <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 12, 140)}vh` }}>
           <div className="lg:sticky lg:top-24">
             <div className="grid gap-5 lg:grid-cols-12 lg:items-center">
 

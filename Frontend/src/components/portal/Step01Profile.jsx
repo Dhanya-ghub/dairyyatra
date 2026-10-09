@@ -114,7 +114,7 @@ export default function Step1Profile({ formData, setFormData, errors = {} }) {
           />
         </Field>
 
-        <Field label="Email Address" required error={errors.email} className="md:col-span-2">
+        <Field label="Email Address" optional error={errors.email} className="md:col-span-2">
           <input
             type="email"
             placeholder="you@example.com"

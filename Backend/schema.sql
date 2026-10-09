@@ -32,7 +32,7 @@ create table eoi_applications (
   gender        text not null check (gender in ('Male', 'Female', 'Other')),
   whatsapp      text not null unique check (whatsapp ~ '^[6-9][0-9]{9}$'),
   secondary_no  text check (secondary_no is null or secondary_no ~ '^[6-9][0-9]{9}$'),
-  email         text not null check (char_length(email) <= 150),
+  email         text check (email is null or char_length(email) <= 150),
   address       text not null check (char_length(address) between 10 and 500),
   city          text not null,
   state         text not null,
@@ -40,6 +40,8 @@ create table eoi_applications (
   organization  text,
 
   -- Step 2: Dairy Experience
+  wants_scholarship boolean not null default false,
+  scholarship_reason text,
   prior_experience      text not null,
   motivation            text not null,
   learning_expectations text not null,
@@ -49,11 +51,13 @@ create table eoi_applications (
   shortlisted_at timestamptz,
 
   submitted_at  timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
+  updated_at    timestamptz not null default now(),
+  check (not wants_scholarship or nullif(btrim(scholarship_reason), '') is not null)
 );
 
--- One application per email (case-insensitive). WhatsApp is already unique above.
-create unique index eoi_email_unique on eoi_applications (lower(email));
+-- One application per supplied email (case-insensitive). WhatsApp is already unique above.
+create unique index eoi_email_unique on eoi_applications (lower(email))
+  where email is not null and email <> '';
 create index eoi_status_idx    on eoi_applications (status);
 create index eoi_submitted_idx on eoi_applications (submitted_at desc);
 

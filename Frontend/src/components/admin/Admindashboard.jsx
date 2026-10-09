@@ -172,6 +172,8 @@ export default function AdminDashboard({ onLogout }) {
         ['Address', [d.address, d.city, d.state].filter(Boolean).join(', ')],
         ['Occupation', d.occupation],
         ['Organization', d.organization],
+        ['Scholarship requested', d.wantsScholarship],
+        ...(d.wantsScholarship === 'Yes' ? [['Scholarship reason', d.scholarshipReason]] : []),
         ['Prior dairy experience', d.priorExperience],
         ['Motivation', d.motivation],
         ['Learning expectations', d.learningExpectations],

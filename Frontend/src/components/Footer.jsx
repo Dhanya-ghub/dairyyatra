@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Mail, MapPin, Heart } from 'lucide-react';
+import { Download, Mail, MapPin, Heart, Instagram, Phone } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
 import kiLogo from '../assets/kilg.png';
 
@@ -67,11 +67,25 @@ export default function Footer({ onOpenApply }) {
                 For cohort inquiries, parent communications, or press details:
               </p>
               <div className="space-y-3 mb-6">
-                <a href="mailto:info@dairyyatra.in" className="flex items-center gap-2 text-sm text-white hover:text-[#66A3BF] transition-colors">
-                  <Mail className="w-4 h-4 text-[#66A3BF]" /> info@dairyyatra.in / apply@dairyyatra.in
-                </a>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a href="mailto:info@dairyyatra.in" className="flex items-center gap-2 text-sm text-white hover:text-[#66A3BF] transition-colors">
+                    <Mail className="w-4 h-4 text-[#66A3BF]" /> info@dairyyatra.in / apply@dairyyatra.in
+                  </a>
+                  <a
+                    href="https://www.instagram.com/dairy.yatra?mdxt=MTZjOHp5c2NyYng0cQ=="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Dairy Yatra on Instagram (opens in a new tab)"
+                    className="text-[#66A3BF] transition-colors hover:text-white"
+                  >
+                    <Instagram className="h-4 w-4" />
+                  </a>
+                </div>
+                <span className="flex items-center gap-2 text-sm text-white/80">
+                  <Phone className="w-4 h-4 text-[#66A3BF]" /> Phone:
+                </span>
                 <span className="flex items-center gap-2 text-xs text-[#F2EFE7]/70">
-                  <MapPin className="w-4 h-4 text-[#66A3BF]" /> Headquarters: Mumbai & Coimbatore
+                  <MapPin className="w-4 h-4 text-[#66A3BF]" /> Headquarters: Coimbatore
                 </span>
               </div>
 
@@ -98,7 +112,7 @@ export default function Footer({ onOpenApply }) {
         {/* Bottom copyright */}
         <ScrollReveal animation="fade" delay={350} duration={600}>
           <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-[#F2EFE7]/60 gap-4">
-            <p>© Kumaraguru Institutions. All rights reserved.</p>
+            <p>© 2026 Kumaraguru Institution</p>
             <p className="flex items-center gap-1">
               Built with <Heart className="w-3.5 h-3.5 text-rose-500 fill-current animate-pulse" /> for Rural Dairy Innovation across India.
             </p>

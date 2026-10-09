@@ -59,21 +59,7 @@ export default function Header({ onOpenApply }) {
       /* 6% each side matches the 88% width the hero spreads its photo columns across */
       style={{ paddingLeft: 'max(16px, 6%)', paddingRight: 'max(16px, 6%)' }}
     >
-      <div className="w-full flex items-center justify-between">
-
-        {/* 1. LEFT: LOGO & BRANDING */}
-        <a href="#" className="flex items-center gap-3.5 group shrink-0">
-          <div className="w-12 h-12 min-w-[48px] flex items-center justify-center overflow-hidden rounded-xl bg-white p-0.5 border border-[#E2E8F0] shadow-xs group-hover:scale-105 transition-transform duration-300">
-            <img
-              src="/logo.jpeg"
-              alt="Dairy Yatra Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
-          <span className="font-sans text-base sm:text-lg lg:text-xl font-black tracking-tight text-[#1B2A4A] leading-none">
-            DAIRY YATRA 2027
-          </span>
-        </a>
+      <div className="w-full flex items-center justify-end">
 
         {/* 2. RIGHT (desktop): NAV LINKS, BROCHURE LINK, MAIN BUTTON */}
         <div className="hidden lg:flex items-center gap-5 xl:gap-7 justify-end">

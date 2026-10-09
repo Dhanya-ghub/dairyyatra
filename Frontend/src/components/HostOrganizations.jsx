@@ -36,7 +36,7 @@ export default function HostOrganizations() {
   return (
     <section
       id="hosts"
-      className="dy-ho relative flex min-h-screen items-center bg-white py-12 font-sans text-[#172738] border-b border-slate-100 sm:py-16"
+      className="dy-ho relative flex items-center bg-white py-12 font-sans text-[#172738] border-b border-slate-100 sm:py-16"
       style={{ '--hh': HEADER_HEIGHT, '--rows': rows }}
     >
       <style>{`

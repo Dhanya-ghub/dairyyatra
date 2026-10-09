@@ -12,6 +12,8 @@ export const INITIAL_EOI_STATE = {
   occupation: '',
   organization: '',
   // Step 2 - Dairy Experience
+  wantsScholarship: '',
+  scholarshipReason: '',
   priorExperience: '',
   motivation: '',
   learningExpectations: '',
@@ -32,7 +34,7 @@ export const INDIAN_STATES = [
 // Which field keys belong to which step (used to jump to the right step on server errors)
 export const STEP_FIELDS = {
   1: ['fullName', 'dob', 'gender', 'whatsapp', 'secondaryNo', 'email', 'address', 'city', 'state', 'occupation', 'organization'],
-  2: ['priorExperience', 'motivation', 'learningExpectations'],
+  2: ['wantsScholarship', 'scholarshipReason', 'priorExperience', 'motivation', 'learningExpectations'],
 };
 
 export function calculateAge(dob) {
@@ -60,7 +62,8 @@ export function validateEoiStep(step, d) {
     if (!d.gender) e.gender = 'Select your gender';
     if (!PHONE.test((d.whatsapp || '').trim())) e.whatsapp = 'Enter a valid 10-digit WhatsApp number';
     if (d.secondaryNo && !PHONE.test(d.secondaryNo.trim())) e.secondaryNo = 'Enter a valid 10-digit number or leave it empty';
-    if (!EMAIL.test((d.email || '').trim())) e.email = 'Enter a valid email address';
+    const email = (d.email || '').trim();
+    if (email && !EMAIL.test(email)) e.email = 'Enter a valid email address';
     if (!d.address || d.address.trim().length < 10) e.address = 'Enter your residential address';
     if (!d.city || !d.city.trim()) e.city = 'City is required';
     if (!d.state) e.state = 'State is required';
@@ -68,6 +71,9 @@ export function validateEoiStep(step, d) {
   }
 
   if (step === 2) {
+    if (!['Yes', 'No'].includes(d.wantsScholarship)) e.wantsScholarship = 'Select Yes or No';
+    if (d.wantsScholarship === 'Yes' && !d.scholarshipReason?.trim())
+      e.scholarshipReason = 'Tell us why you are applying for a scholarship';
     if (!d.priorExperience || d.priorExperience.trim().length < 3)
       e.priorExperience = 'Required (write "None" if you have no experience)';
     if (!d.motivation || d.motivation.trim().length < 30)

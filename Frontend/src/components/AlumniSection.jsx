@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import alumnusThreePhoto from '../assets/a3.jpeg';
 
 /* Alumni photos: put the image files in  src/assets/alumni/  (a file straight in src/assets/ also works).
    In the list below, just write the file name, e.g.  photo: 'a1.jpeg'
@@ -36,7 +37,7 @@ const photoUrl = (file) => {
 const ALUMNI = [
   { name: 'Shanthra P', role: 'CEO, Pariyur FPO', quote: 'Great learning journey filled with new experiences and memories', photo: 'a1.jpeg' },
   { name: 'Ragotham', role: 'Student, KCT-BS (Agri)', quote: 'I had a great learning experience by visiting and gaining practical exposure to various dairy units and institutions.', photo: 'a2.jpeg' },
-  { name: 'Arunkumar Krishnamoorthy', role: 'Senior Executive', quote: 'Across fertile plains and pastoral trails: a journey into the heart of Indias living dairy heritage.', photo: 'a3.jpeg' },
+  { name: 'Arunkumar Krishnamoorthy', role: 'Senior Executive', quote: 'Across fertile plains and pastoral trails: a journey into the heart of Indias living dairy heritage.', photo: alumnusThreePhoto },
 
   // { name: 'Full name', role: 'Role, Organisation', quote: 'One or two sentences.', photo: 'a3.jpeg' },
 ];

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dairy Yatra — Experiential Immersion Across India</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#1a1412',
+              forest: '#233f28',
+              olive: '#3e5c43',
+              cream: '#fdfbf7',
+              creamLow: '#f4efe6',
+              terracotta: '#a64b2a',
+              amber: '#c76839',
+              gold: '#e0b038',
+              textDark: '#281e18',
+              textMuted: '#594d46',
+              border: '#e6ded3'
+            }
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Fonts & Icons (Agri Anubhav Style) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <!-- React & Babel for Instant In-Browser Execution -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    @keyframes dash {
+      to { stroke-dashoffset: 0; }
+    }
+    .animate-dash {
+      stroke-dasharray: 8;
+      animation: dash 20s linear infinite;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f4efe6; }
+    ::-webkit-scrollbar-thumb { background: #3e5c43; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-[#fdfbf7] text-[#281e18] font-sans antialiased selection:bg-[#a64b2a] selection:text-white">
+
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  const ROUTE_STOPS = [
+    {
+      id: 'coimbatore-start',
+      day: 'Day 1',
+      city: 'Coimbatore',
+      state: 'Tamil Nadu',
+      title: 'Journey Begins',
+      institution: 'Yatra Flagoff Base',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 34.5,
+      mapY: 82.5,
+      heroImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80',
+      description: 'Set learning goals and expectations for the experiential journey across India. Orientation and boarding the Special Yatra Train.',
+      learnings: [
+        'Orientation and cohort bonding among 40 selected entrepreneurs',
+        'Establishing learning frameworks for milk supply chains and rural systems',
+        'Briefing on logistical safety, physical wellness, and daily journal compilation'
+      ]
+    },
+    {
+      id: 'tiptur',
+      day: 'Days 2 - 3',
+      city: 'Tiptur',
+      state: 'Karnataka',
+      title: 'Organic Dairying & Breed Research',
+      institution: 'Akshayakalpa Farm & BAIF Foundation',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 30.5,
+      mapY: 76.5,
+      heroImage: 'https://images.unsplash.com/photo-1546445317-29f4545f9d52?auto=format&fit=crop&w=1200&q=80',
+      description: 'Explore organic dairy farming, chemical-free production, direct farm-to-consumer models at Akshayakalpa, and innovative breed & fodder development at BAIF.',
+      learnings: [
+        'Understand ethical animal husbandry & organic supply chain management',
+        'Examine integrated dairy and vegetable production models',
+        'Explore BAIF model of livestock genetic improvement & watershed management'
+      ]
+    },
+    {
+      id: 'kolhapur',
+      day: 'Days 4 - 5',
+      city: 'Kolhapur',
+      state: 'Maharashtra',
+      title: 'Total Mixed Ration (TMR) & Buffalo Dairying',
+      institution: 'TMR Plant of Gokul Dairy',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 25.5,
+      mapY: 65.5,
+      heroImage: 'https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?auto=format&fit=crop&w=1200&q=80',
+      description: 'Witness technological innovation in dairy feed management at Gokul Dairy TMR Plant, buffalo farming dynamics, and local milk culture.',
+      learnings: [
+        'Gain insights into Total Mixed Ration (TMR) precision cattle nutrition',
+        'Study buffalo farming economics and high-fat milk processing',
+        'Cultural immersion into Maharashtra pastoral dairy traditions'
+      ]
+    },
+    {
+      id: 'baramati',
+      day: 'Day 6',
+      city: 'Baramati',
+      state: 'Maharashtra',
+      title: 'Centre of Excellence in Dairy',
+      institution: 'Centre of Excellence in Dairy, Baramati',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 27.5,
+      mapY: 60.5,
+      heroImage: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=1200&q=80',
+      description: 'Examine cutting-edge research, automated milking systems, integrated dairy production models, and farmer training infrastructure.',
+      learnings: [
+        'Latest scientific advancements in herd health and precision farming',
+        'Hands-on observation of automated parlor machinery and climate control sheds',
+        'Institutional frameworks for training smallholder farmers at scale'
+      ]
+    },
+    {
+      id: 'phaltan',
+      day: 'Day 7',
+      city: 'Phaltan',
+      state: 'Maharashtra',
+      title: 'Farmer Empowerment & Hydroponics',
+      institution: 'Govind Dairy',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 28.5,
+      mapY: 57.5,
+      heroImage: 'https://images.unsplash.com/photo-1595855759920-86582396756a?auto=format&fit=crop&w=1200&q=80',
+      description: 'Gain insights into holistic farmer empowerment initiatives including hydroponic fodder cultivation, loose housing barn design, and village milk collection.',
+      learnings: [
+        'Hydroponic green fodder production for drought resilience',
+        'Loose housing cattle management improving cow comfort and milk yield',
+        'Community trust models in rural milk collection centers'
+      ]
+    },
+    {
+      id: 'shrirampur',
+      day: 'Day 8',
+      city: 'Shrirampur',
+      state: 'Maharashtra',
+      title: 'Value Chain Integration',
+      institution: 'Prabhat Dairy',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 29.5,
+      mapY: 54.5,
+      heroImage: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1200&q=80',
+      description: 'Understand value chain integration, commercial breeding farms, market-oriented enterprise structures, and value-added dairy product lines.',
+      learnings: [
+        'Scale economics in skimmed milk powder (SMP) and cheese manufacturing',
+        'Integration of small-holder procurement networks into commercial supply chains',
+        'Breeding farm protocols for high-yield dairy genetics'
+      ]
+    },
+    {
+      id: 'anand',
+      day: 'Days 9 - 11',
+      city: 'Anand',
+      state: 'Gujarat',
+      title: 'Milk Capital & Bio-Economy',
+      institution: 'National Dairy Development Board (NDDB) & Mrida',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 22.5,
+      mapY: 46.5,
+      heroImage: 'https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1200&q=80',
+      description: 'Visit the epicenter of India’s White Revolution. Explore NDDB policy, extension mechanisms, small-scale processing efficiency, and Mrida bio-gas manure value chain.',
+      learnings: [
+        'Cooperative movement legacy and national dairy policy frameworks',
+        'Small-scale processing unit efficiency for localized micro-entrepreneurs',
+        'Dung-to-wealth bio-gas and organic fertilizer circular models at Mrida'
+      ]
+    },
+    {
+      id: 'bikaner',
+      day: 'Days 12 - 13',
+      city: 'Bikaner',
+      state: 'Rajasthan',
+      title: 'Alternative Dairying & Arid Farming',
+      institution: 'ICAR-NRC on Camel & Saras Dairy',
+      modeToNext: 'Train',
+      transportIcon: 'train',
+      mapX: 20.5,
+      mapY: 29.5,
+      heroImage: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1200&q=80',
+      description: 'Explore camel and donkey dairy innovations, therapeutic milk processing at ICAR-NRCC, and drought-resilient dairy farming under desert conditions at Saras Dairy.',
+      learnings: [
+        'Commercial potential and health benefits of Camel & Donkey milk products',
+        'Cold chain resilience and water scarcity management in desert dairying',
+        'Integration of sheep and wool production systems with pastoral cattle'
+      ]
+    },
+    {
+      id: 'jaipur',
+      day: 'Day 14',
+      city: 'Jaipur',
+      state: 'Rajasthan',
+      title: 'Synthesize & Valedictory Session',
+      institution: 'Jaipur Regional Synthesis Hub',
+      modeToNext: 'Flight',
+      transportIcon: 'flight',
+      mapX: 27.5,
+      mapY: 34.5,
+      heroImage: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=80',
+      description: 'Synthesize key learnings, reflect on regional diversity, and host the formal Valedictory Program in traditional national attire.',
+      learnings: [
+        'Cross-state comparison of dairy business models and productivity metrics',
+        'Business proposal ideation and peer pitch session',
+        'Valedictory celebration & compilation of Yatra Coffee Table Book'
+      ]
+    },
+    {
+      id: 'coimbatore-return',
+      day: 'Day 15',
+      city: 'Coimbatore',
+      state: 'Tamil Nadu',
+      title: 'Return Journey & Knowledge Application',
+      institution: 'Yatra Conclusion',
+      modeToNext: 'Done',
+      transportIcon: 'check_circle',
+      mapX: 34.5,
+      mapY: 82.5,
+      heroImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+      description: 'Return flight to Coimbatore. Consolidate experiences, action plans for venture execution, and ongoing alumni network launch.',
+      learnings: [
+        'Drafting post-Yatra venture execution roadmap',
+        'Forming long-term partnerships among 40 entrepreneur alumni',
+        'Final submission of travel journals, sketches, and photographic documentation'
+      ]
+    }
+  ];
+
+  const FULL_ITINERARY = [
+    { day: 1, location: 'Coimbatore, Tamil Nadu', institution: 'Journey Begins', objective: 'Set learning goals and expectations for the experiential journey', transport: 'Train' },
+    { day: 2, location: 'Tiptur, Karnataka', institution: 'Akshayakalpa', objective: 'Understand organic dairy farming and integrated models of dairy and vegetable production', transport: 'Bus / Farm Walk' },
+    { day: 3, location: 'Tiptur, Karnataka', institution: 'BAIF Development Research Foundation', objective: 'Explore innovative breed development and fodder development strategies', transport: 'Local Transit' },
+    { day: 4, location: 'Kolhapur, Maharashtra', institution: 'Travel & Cultural Immersion', objective: 'Reflect on local culture and context in dairy practices', transport: 'Train' },
+    { day: 5, location: 'Kolhapur, Maharashtra', institution: 'Businesses / Gokul TMR Plant', objective: 'Learn about Total Mixed Ration (TMR) production and its role in balanced feeding, learn buffalo farming', transport: 'Bus / Facility Tour' },
+    { day: 6, location: 'Baramati, Maharashtra', institution: 'Centre of Excellence in Dairy', objective: 'Examine integrated models for dairy production and training', transport: 'Bus' },
+    { day: 7, location: 'Phaltan, Maharashtra', institution: 'Govind Dairy', objective: 'Gain insights into farmer empowerment initiatives including TMR, hydroponics, loose housing models', transport: 'Local Transit' },
+    { day: 8, location: 'Shrirampur, Maharashtra', institution: 'Prabhat Dairy', objective: 'Understand value chain integration and market-oriented dairy enterprise (TMR, breeding farms)', transport: 'Bus' },
+    { day: 9, location: 'Anand, Gujarat', institution: 'National Dairy Development Board (NDDB)', objective: 'Explore NDDB’s farmer support services and extension mechanisms, small scale processing unit efficiency', transport: 'Train / Bus' },
+    { day: 10, location: 'Anand, Gujarat', institution: 'Mrida, NDDB', objective: 'Understand manure management and value chain for sustainable dairying', transport: 'Facility Visit' },
+    { day: 11, location: 'Anand, Gujarat', institution: 'Travel & Cultural Immersion', objective: 'Observe regional practices and engage in reflective learning', transport: 'Train' },
+    { day: 12, location: 'Bikaner, Rajasthan', institution: 'ICAR – NRC on Camel', objective: 'Learn about alternative dairy opportunities from camels and donkeys', transport: 'Bus' },
+    { day: 13, location: 'Bikaner, Rajasthan', institution: 'Saras Dairy & CSWRI', objective: 'Explore drought-resilient dairy farming practices in arid zones and sheep farming integration', transport: 'Local Transit' },
+    { day: 14, location: 'Jaipur, Rajasthan', institution: 'Wrap-Up & Cultural Immersion', objective: 'Synthesize key learnings and reflect on regional diversity in dairy (Valedictory Program)', transport: 'Bus / Hotel' },
+    { day: 15, location: 'Coimbatore, Tamil Nadu', institution: 'Return Journey', objective: 'Consolidate experiences and plan for knowledge application', transport: 'Flight Return' },
+  ];
+
+  function App() {
+    const [activeStopIndex, setActiveStopIndex] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isApplyOpen, setIsApplyOpen] = useState(false);
+
+    const currentStop = ROUTE_STOPS[activeStopIndex];
+
+    useEffect(() => {
+      let interval = null;
+      if (isPlaying) {
+        interval = setInterval(() => {
+          setActiveStopIndex((prev) => (prev + 1) % ROUTE_STOPS.length);
+        }, 3500);
+      }
+      return () => clearInterval(interval);
+    }, [isPlaying]);
+
+    return (
+      <div className="min-h-screen bg-[#fdfbf7] text-[#281e18] font-sans">
+        
+        {/* HEADER */}
+        <header className="fixed top-0 left-0 right-0 z-40 bg-[#1a1412]/95 backdrop-blur-md text-white py-3 border-b border-white/10 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+            <a href="#" className="flex items-center gap-3">
+              <img src="/logo.jpeg" alt="Dairy Yatra Logo" className="h-10 w-auto rounded-xl bg-white p-1" />
+              <div>
+                <span className="font-serif text-2xl font-bold tracking-tight block leading-none">Dairy Yatra</span>
+                <span className="text-[10px] uppercase tracking-widest text-brand-gold font-bold">Beyond the Farm</span>
+              </div>
+            </a>
+
+            <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
+              <a href="#overview" className="hover:text-brand-gold">Overview</a>
+              <a href="#interactive-map" className="hover:text-brand-gold text-brand-gold flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">explore</span> Route Experience
+              </a>
+              <a href="#itinerary" className="hover:text-brand-gold">15-Day Itinerary</a>
+              <a href="#hosts" className="hover:text-brand-gold">Host Organizations</a>
+              <a href="#preparation" className="hover:text-brand-gold">Traveler Checklist</a>
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <a href="Brochure.pdf" download className="hidden sm:inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2 rounded-xl text-xs font-bold border border-white/20">
+                <span className="material-symbols-outlined text-sm">download</span> Brochure PDF
+              </a>
+              <button onClick={() => setIsApplyOpen(true)} className="bg-brand-terracotta hover:bg-brand-amber text-white px-5 py-2 rounded-xl font-bold text-xs shadow-lg transition-transform hover:scale-105">
+                Apply Now →
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* HERO MATCHING AGRI ANUBHAV SCREENSHOT */}
+        <section className="relative min-h-screen bg-[#1a1412] text-white flex flex-col justify-between pt-28 pb-10 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <div 
+              className="w-full h-full bg-cover bg-center filter brightness-85 contrast-105 scale-105"
+              style={{ backgroundImage: `url('https://images.unsplash.com/photo-1546445317-29f4545f9d52?auto=format&fit=crop&w=2000&q=80')` }}
+            />
+          </div>
+          <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#1a1412]/80 via-[#1a1412]/60 to-[#1a1412]/95" />
+
+          <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center my-auto w-full pt-8">
+            {/* Eyebrow Pill */}
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md text-[#e0b038] text-xs sm:text-sm font-bold uppercase tracking-widest border border-white/20 shadow-md mb-8">
+              <span>Experiential Dairy Immersion in India</span>
+            </div>
+
+            {/* Two-Tone Grand Cormorant Garamond Title */}
+            <h1 className="font-serif text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight mb-6 leading-[1.05]">
+              <span className="text-white block">Experience the</span>
+              <span className="text-[#e0b038] italic block font-semibold">Roots of Dairy</span>
+            </h1>
+
+            {/* Subtitles */}
+            <p className="font-sans text-lg sm:text-2xl text-brand-cream/90 font-normal max-w-3xl mx-auto mb-4 leading-relaxed">
+              A groundbreaking 15-day travel program bringing together 40 entrepreneurs to explore India's dynamic dairy sector across 5 states.
+            </p>
+            <p className="font-sans text-sm sm:text-base text-brand-cream/75 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+              Reconnect with where milk originates, how rural processing thrives, and the visionary farmers and institutions driving sustainable progress.
+            </p>
+
+            {/* Centered CTA Buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-4 font-sans mb-12">
+              <button onClick={() => setIsApplyOpen(true)} className="bg-[#a64b2a] hover:bg-[#c76839] text-white font-bold px-8 py-4 rounded-2xl text-base shadow-2xl hover:scale-105 transition-all">
+                Expression of Interest
+              </button>
+              <a href="#interactive-map" className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-2xl text-base border border-white/25 hover:scale-105 transition-all flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm text-[#e0b038]">explore</span> Explore Route Experience
+              </a>
+            </div>
+
+            {/* Scroll Prompt (Agri Anubhav Style) */}
+            <a href="#stats-strip" className="inline-flex flex-col items-center gap-1.5 text-white/70 hover:text-white transition-colors cursor-pointer">
+              <span className="text-xs uppercase tracking-widest font-medium">Scroll to discover</span>
+              <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center animate-bounce">
+                <span className="material-symbols-outlined text-sm text-[#e0b038]">expand_more</span>
+              </div>
+            </a>
+          </div>
+
+          {/* Stats Counter Strip (Revealed after scroll) */}
+          <div id="stats-strip" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 w-full pt-10">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/15 text-center">
+              <div><span className="font-serif text-4xl font-bold text-brand-gold block">15</span><span className="text-xs uppercase font-bold text-brand-cream/80">Days</span></div>
+              <div><span className="font-serif text-4xl font-bold text-white block">5</span><span className="text-xs uppercase font-bold text-brand-cream/80">States</span></div>
+              <div><span className="font-serif text-4xl font-bold text-brand-gold block">40</span><span className="text-xs uppercase font-bold text-brand-cream/80">Entrepreneurs</span></div>
+              <div><span className="font-serif text-4xl font-bold text-white block">15+</span><span className="text-xs uppercase font-bold text-brand-cream/80">Host Institutions</span></div>
+              <div><span className="font-serif text-4xl font-bold text-brand-gold block">6,000+</span><span className="text-xs uppercase font-bold text-brand-cream/80">KM Traversed</span></div>
+              <div><span className="font-serif text-4xl font-bold text-white block">150+</span><span className="text-xs uppercase font-bold text-brand-cream/80">Immersion Hours</span></div>
+            </div>
+          </div>
+        </section>
+
+        {/* ROUTE EXPERIENCE SECTION */}
+        <section id="interactive-map" className="py-20 bg-brand-forest text-white relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <span className="px-3.5 py-1 bg-white/10 text-brand-gold text-xs font-bold uppercase rounded-full tracking-widest inline-block mb-3">Interactive Route Experience</span>
+              <h2 className="font-serif text-4xl sm:text-5xl font-bold mb-3">Traversing 5 States Across India</h2>
+              <p className="text-brand-cream/80 text-sm sm:text-base">Follow the journey step-by-step across Tamil Nadu, Karnataka, Maharashtra, Gujarat, and Rajasthan. Select any stop to view high-res images and host learning objectives!</p>
+            </div>
+
+            {/* Controls Bar */}
+            <div className="bg-white/10 rounded-2xl p-4 mb-8 flex flex-wrap items-center justify-between gap-4 border border-white/15">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setIsPlaying(!isPlaying)} className="bg-brand-gold text-brand-dark px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg">
+                  <span className="material-symbols-outlined text-sm">{isPlaying ? 'pause' : 'play_arrow'}</span>
+                  {isPlaying ? 'Pause Simulator' : 'Play Journey'}
+                </button>
+                <button onClick={() => setActiveStopIndex((prev) => (prev - 1 + ROUTE_STOPS.length) % ROUTE_STOPS.length)} className="p-2 bg-white/10 rounded-xl hover:bg-white/20">←</button>
+                <button onClick={() => setActiveStopIndex((prev) => (prev + 1) % ROUTE_STOPS.length)} className="p-2 bg-white/10 rounded-xl hover:bg-white/20">→</button>
+              </div>
+              <div className="font-serif text-xl font-bold">
+                Stop {activeStopIndex + 1} of {ROUTE_STOPS.length}: <span className="text-brand-gold">{currentStop.city}, {currentStop.state}</span>
+              </div>
+            </div>
+
+            {/* Clean Map Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              <div className="lg:col-span-7 bg-[#f6f4eb] rounded-3xl p-6 shadow-2xl border border-white/20 relative">
+                <div className="relative aspect-[4/4.8] w-full rounded-2xl overflow-hidden flex items-center justify-center">
+                  <img src="india-map-route.png" alt="India Route Map" className="w-full h-full object-contain" />
+
+                  {/* Discrete Dots */}
+                  {ROUTE_STOPS.map((stop, idx) => {
+                    const isActive = idx === activeStopIndex;
+                    return (
+                      <button key={stop.id} onClick={() => { setActiveStopIndex(idx); setIsPlaying(false); }} style={{ left: `${stop.mapX}%`, top: `${stop.mapY}%` }} className="absolute -translate-x-1/2 -translate-y-1/2 z-20 p-2">
+                        {isActive && <span className="absolute inset-0 rounded-full bg-brand-terracotta/40 animate-ping"></span>}
+                        <div className={`rounded-full transition-all ${isActive ? 'w-5 h-5 bg-brand-terracotta ring-4 ring-white scale-125' : 'w-3 h-3 bg-brand-forest/70 hover:bg-brand-terracotta'}`}></div>
+                      </button>
+                    );
+                  })}
+
+                  {/* Single Sleek Marker */}
+                  <div style={{ left: `${currentStop.mapX}%`, top: `${currentStop.mapY}%`, transition: 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }} className="absolute -translate-x-1/2 -translate-y-full mb-2 pointer-events-none z-30 flex items-center gap-1.5 bg-brand-dark text-white border border-brand-gold/60 px-3 py-1.5 rounded-full shadow-2xl">
+                    <span className="material-symbols-outlined text-xs text-brand-gold">{currentStop.transportIcon}</span>
+                    <span className="text-[11px] font-extrabold whitespace-nowrap">{currentStop.city}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 bg-white text-[#281e18] rounded-3xl p-6 sm:p-8 shadow-2xl">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-3 py-1 bg-brand-forest/10 text-brand-forest text-xs font-bold uppercase rounded-full">{currentStop.day}</span>
+                  <span className="text-xs font-bold text-brand-terracotta bg-brand-terracotta/10 px-3 py-1 rounded-full">{currentStop.modeToNext} Transport</span>
+                </div>
+                <h3 className="font-serif text-3xl sm:text-4xl font-bold text-brand-dark mb-1">{currentStop.city}</h3>
+                <p className="text-xs font-bold text-brand-terracotta mb-4">📍 {currentStop.state} — {currentStop.title}</p>
+                
+                <div className="rounded-2xl overflow-hidden aspect-video mb-4 shadow-md">
+                  <img src={currentStop.heroImage} alt={currentStop.city} className="w-full h-full object-cover" />
+                </div>
+
+                <p className="text-xs sm:text-sm text-brand-textMuted leading-relaxed mb-4">{currentStop.description}</p>
+                
+                <div className="bg-brand-cream rounded-xl p-3.5 mb-4 border border-brand-border/40">
+                  <span className="text-[10px] uppercase font-bold text-brand-olive block">Host Institution / Focus</span>
+                  <span className="font-serif text-base font-bold text-brand-dark">{currentStop.institution}</span>
+                </div>
+
+                <div className="space-y-1.5 text-xs text-brand-textMuted">
+                  {currentStop.learnings.map((l, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta mt-1 shrink-0"></span>
+                      <span>{l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* APPLICATION MODAL */}
+        {isApplyOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-brand-border">
+              <button onClick={() => setIsApplyOpen(false)} className="absolute top-4 right-4 text-gray-500 font-bold hover:text-black">✕</button>
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/logo.jpeg" alt="Logo" className="h-10 w-auto rounded-lg bg-white p-1" />
+                <h3 className="font-serif text-3xl font-bold text-brand-dark">Expression of Interest</h3>
+              </div>
+              <p className="text-xs text-brand-textMuted mb-6">Submitting your details opens your default email client to send to <strong>apply@dairyyatra.in</strong>.</p>
+              
+              <form onSubmit={(e) => { e.preventDefault(); window.location.href = `mailto:apply@dairyyatra.in?subject=Dairy Yatra Application`; setIsApplyOpen(false); }} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-brand-olive mb-1">Full Name</label>
+                  <input required type="text" placeholder="Ramesh Kumar" className="w-full border p-2.5 rounded-xl text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-brand-olive mb-1">Email Address</label>
+                  <input required type="email" placeholder="ramesh@example.com" className="w-full border p-2.5 rounded-xl text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-brand-olive mb-1">Statement of Interest</label>
+                  <textarea required rows="3" placeholder="Tell us about your background..." className="w-full border p-2.5 rounded-xl text-sm"></textarea>
+                </div>
+                <button type="submit" className="w-full bg-brand-terracotta text-white font-bold py-3 rounded-xl shadow-lg">Submit Application via Email →</button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* FOOTER */}
+        <footer className="bg-brand-dark text-white py-12 border-t border-white/10 text-center text-xs">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <img src="/logo.jpeg" alt="Logo" className="h-9 w-auto rounded bg-white p-1" />
+            <span className="font-serif text-xl font-bold">Dairy Yatra</span>
+          </div>
+          <p>© Dairy Yatra Initiative across Tamil Nadu, Karnataka, Maharashtra, Gujarat, and Rajasthan.</p>
+        </footer>
+
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

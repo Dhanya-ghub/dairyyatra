@@ -1,0 +1,536 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #F2EFE7;
+    color: #172738;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #3368A0;
+    color: #FFFFFF;
+  }
+}
+
+/* Custom animations */
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Stats Bar Lively Ambient Animations */
+@keyframes statFloatWave {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes statGlowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.35));
+    opacity: 0.95;
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.7));
+    opacity: 1;
+  }
+}
+
+.animate-stat-float {
+  animation: statFloatWave 3s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-stat-glow {
+  animation: statGlowPulse 2.5s ease-in-out infinite;
+}
+
+.stat-card-interactive {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, filter;
+  transition: transform 0.25s ease-out, filter 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+
+.stat-card-interactive:hover {
+  animation-play-state: paused !important;
+  transform: scale(1.08) translateY(-6px) !important;
+  filter: brightness(1.25);
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.2);
+  z-index: 20;
+}
+
+.stat-card-interactive::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  pointer-events: none;
+  transition: transform 0.6s ease;
+}
+
+.stat-card-interactive:hover::after {
+  transform: translateX(100%) rotate(25deg);
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-dash {
+  stroke-dasharray: 10;
+  animation: dash 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeReverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marqueeReverse 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-reverse:hover {
+  animation-play-state: paused;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F2EFE7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #66A3BF;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3368A0;
+}
+
+/* Hide scrollbar for tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Transitions.dev Spinning Counter / Reel */
+:root {
+  --reel-dur: 1400ms;
+  --reel-cell: 56px;
+  /* Expanded cell height for full serif number visibility */
+  --reel-spin-blur: 2px;
+  --reel-stagger: 90ms;
+  --reel-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --reel-cell: 44px;
+  }
+}
+
+.t-reel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--reel-cell);
+  font-variant-numeric: tabular-nums;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.t-reel-col {
+  position: relative;
+  height: var(--reel-cell);
+  overflow: hidden;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.t-reel-strip {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.t-reel-digit {
+  height: var(--reel-cell);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+}
+
+.t-reel-static {
+  height: var(--reel-cell);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-reel-strip {
+    transition: none !important;
+    filter: none !important;
+  }
+}
+
+/* Transitions.dev — Card hover tilt */
+:root {
+  --tilt-perspective: 1000px;
+  --tilt-return: 1000ms;
+  --tilt-return-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tilt-follow: 400ms;
+  --tilt-follow-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tilt-glare-opacity: 0.32;
+  --tilt-glare-fade: 300ms;
+  --tilt-glare-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The outer wrapper is the flat hit area; touch-action:none
+   lets a finger drag tilt the card instead of scrolling the
+   page, so tap-hold-drag works on mobile. */
+.t-tilt {
+  touch-action: none;
+}
+
+/* The card tilts toward the pointer via rotateX/rotateY fed
+   from JS; on leave it eases back to flat. A separate
+   .is-tilting class swaps in a short linear follow while the
+   pointer moves so the tilt tracks the cursor 1:1. */
+.t-tilt-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  transform:
+    perspective(var(--tilt-perspective)) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform var(--tilt-return) var(--tilt-return-ease);
+  will-change: transform;
+}
+
+.t-tilt-card.is-tilting {
+  transition: transform var(--tilt-follow) var(--tilt-follow-ease);
+}
+
+/* Cursor-tracked glare: layered soft circles that add like
+   light (screen blend) at the pointer position. */
+.t-tilt-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle 95px at var(--tilt-gx, 50%) var(--tilt-gy, 50%),
+      rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.06) 52%, rgba(255, 255, 255, 0) 84%),
+    radial-gradient(circle 200px at var(--tilt-gx, 50%) var(--tilt-gy, 50%),
+      rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.04) 58%, rgba(255, 255, 255, 0) 78%),
+    radial-gradient(circle 360px at var(--tilt-gx, 50%) var(--tilt-gy, 50%),
+      rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 88%);
+  transition: opacity var(--tilt-glare-fade) var(--tilt-glare-ease);
+}
+
+.t-tilt.is-hover .t-tilt-glare {
+  opacity: var(--tilt-glare-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-tilt-card {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Transitions.dev — Tabs sliding */
+:root {
+  --tabs-dur: 250ms;
+  --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tabs-text-muted: #4E657D;
+  --tabs-text-active: #172738;
+  --tabs-bar-bg: #EAE6DB;
+  --tabs-pill-bg: #ffffff;
+}
+
+/* The bar is just a flex container with padding for the pill
+   to sit inside. Tabs sit on z-index: 1, the pill on z-index: 0,
+   so labels read above the pill background. */
+.t-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 48px;
+  background: var(--tabs-bar-bg);
+}
+
+.t-tab {
+  position: relative;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  height: 32px;
+  padding: 4px 14px;
+  color: var(--tabs-text-muted);
+  cursor: pointer;
+  border-radius: 48px;
+  z-index: 1;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: color var(--tabs-dur) var(--tabs-ease);
+}
+
+.t-tab:not([aria-selected="true"]):hover,
+.t-tab[aria-selected="true"] {
+  color: var(--tabs-text-active);
+}
+
+/* The pill: width + transform are written inline by JS so
+   the transition tweens between the previous and next
+   measured positions. */
+.t-tabs-pill {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  height: 32px;
+  width: 0;
+  background: var(--tabs-pill-bg);
+  border-radius: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transform: translateX(0);
+  transition:
+    transform var(--tabs-dur) var(--tabs-ease),
+    width var(--tabs-dur) var(--tabs-ease);
+  will-change: transform, width;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Dark variant */
+.t-tabs-dark {
+  --tabs-bar-bg: rgba(255, 255, 255, 0.1);
+  --tabs-pill-bg: #3368A0;
+  --tabs-text-muted: rgba(242, 239, 231, 0.75);
+  --tabs-text-active: #ffffff;
+}
+
+/* ======================================================== */
+/* Interactive 3-Card Fan-Out / Stack Deck Animation        */
+/* ======================================================== */
+:root {
+  --fan-spring-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fan-spring-dur: 0.45s;
+  --fan-shadow-dur: 0.35s;
+}
+
+.fan-deck-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  perspective: 1000px;
+}
+
+.fan-deck-card {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: transform var(--fan-spring-dur) var(--fan-spring-ease),
+    box-shadow var(--fan-shadow-dur) ease,
+    border-color 0.3s ease,
+    opacity 0.35s ease;
+  will-change: transform, box-shadow;
+  transform-origin: center center;
+  touch-action: manipulation;
+}
+
+.fan-deck-card img,
+.fan-deck-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* 1. RESTING STATE (Collapsed Stack) */
+.fan-deck-card-center {
+  z-index: 3;
+  transform: translate(0px, 0px) rotate(0deg) scale(1);
+}
+
+.fan-deck-card-left {
+  z-index: 2;
+  transform: translate(-8px, 4px) rotate(-4deg) scale(0.96);
+}
+
+.fan-deck-card-right {
+  z-index: 1;
+  transform: translate(8px, 6px) rotate(4deg) scale(0.94);
+}
+
+/* 2. HOVER / FOCUS / EXPANDED STATE (Fanned Out) */
+.fan-deck-container:hover .fan-deck-card-center,
+.fan-deck-container:focus-within .fan-deck-card-center,
+.fan-deck-container.is-fanned .fan-deck-card-center {
+  z-index: 4;
+  transform: translate(0px, -6px) scale(1.05);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+}
+
+.fan-deck-container:hover .fan-deck-card-left,
+.fan-deck-container:focus-within .fan-deck-card-left,
+.fan-deck-container.is-fanned .fan-deck-card-left {
+  z-index: 2;
+  transform: translate(-95px, 6px) rotate(-14deg) scale(0.98);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+}
+
+.fan-deck-container:hover .fan-deck-card-right,
+.fan-deck-container:focus-within .fan-deck-card-right,
+.fan-deck-container.is-fanned .fan-deck-card-right {
+  z-index: 3;
+  transform: translate(95px, 8px) rotate(14deg) scale(0.98);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+}
+
+/* 3. ACTIVE / TAP FEEDBACK (Card Clicked / Lifted to top) */
+.fan-deck-container .fan-deck-card.is-active,
+.fan-deck-container .fan-deck-card:active {
+  z-index: 10 !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.38), 0 0 0 2px rgba(102, 163, 191, 0.8) !important;
+}
+
+/* If active when fanned out, maintain directional translation with lifted scale */
+.fan-deck-container:hover .fan-deck-card-left.is-active,
+.fan-deck-container.is-fanned .fan-deck-card-left.is-active {
+  z-index: 10 !important;
+  transform: translate(-95px, 0px) rotate(-4deg) scale(1.1) !important;
+}
+
+.fan-deck-container:hover .fan-deck-card-center.is-active,
+.fan-deck-container.is-fanned .fan-deck-card-center.is-active {
+  z-index: 10 !important;
+  transform: translate(0px, -12px) rotate(0deg) scale(1.12) !important;
+}
+
+.fan-deck-container:hover .fan-deck-card-right.is-active,
+.fan-deck-container.is-fanned .fan-deck-card-right.is-active {
+  z-index: 10 !important;
+  transform: translate(95px, 0px) rotate(4deg) scale(1.1) !important;
+}
+
+/* 4. REDUCED MOTION ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+
+  .fan-deck-container *,
+  .fan-deck-card {
+    transform: none !important;
+    transition: none !important;
+  }
+}

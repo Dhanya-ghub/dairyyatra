@@ -86,7 +86,7 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
             <Row label="Gender" value={data.gender} />
             <Row label="WhatsApp" value={data.whatsapp} />
             <Row label="Secondary number" value={data.secondaryNo} />
-            <Row label="Email" value={data.email} />
+            <Row label="Email" value={data.email || 'Not provided'} />
             <Row label="Address" value={[data.address, data.city, data.state].filter(Boolean).join(', ')} />
             <Row label="Occupation" value={data.occupation} />
             <Row label="Organization" value={data.organization} />

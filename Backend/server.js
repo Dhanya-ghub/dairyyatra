@@ -5,6 +5,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
@@ -28,7 +31,7 @@ if (missing.length) {
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
-const SEAT_LIMIT = parseInt(process.env.SEAT_LIMIT || '30', 10);
+const SEAT_LIMIT = parseInt(process.env.SEAT_LIMIT || '35', 10);
 
 // EOI window: 12 Oct 2026 to 12 Nov 2026 (IST). Override in .env for testing.
 const EOI_OPENS = new Date(process.env.EOI_OPENS_AT || '2026-10-12T00:00:00+05:30');
@@ -50,8 +53,11 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 // ============================================================
 
 const app = express();
-app.set('trust proxy', 1);
-app.use(helmet());
+// 1 = one reverse proxy (Caddy/nginx) sits in front. Set TRUST_PROXY=0 if Node is exposed directly,
+// otherwise visitors could fake their IP address and get around the rate limits.
+app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 1));
+// CSP is switched off because this server also serves the website (fonts, inline styles, videos).
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(
   cors({
     origin(origin, cb) {
@@ -134,7 +140,7 @@ function validateSubmission(d) {
     e.secondaryNo = 'Enter a valid 10-digit number or leave it empty';
 
   const email = str(d.email);
-  if (!EMAIL.test(email) || email.length > 150) e.email = 'Enter a valid email address';
+  if (email && (!EMAIL.test(email) || email.length > 150)) e.email = 'Enter a valid email address or leave it empty';
 
   const address = str(d.address);
   if (address.length < 10 || address.length > 500) e.address = 'Enter your residential address';
@@ -171,7 +177,7 @@ function mapApplicationToDatabase(f) {
     gender: f.gender,
     whatsapp: digitsOnly(f.whatsapp),
     secondary_no: digitsOnly(f.secondaryNo) || null,
-    email: str(f.email).toLowerCase(),
+    email: str(f.email).toLowerCase() || null, // optional: many applicants have no email
     address: str(f.address),
     city: str(f.city),
     state: str(f.state),
@@ -272,7 +278,7 @@ app.post('/api/submissions', submitLimiter, async (req, res) => {
         if (msg.includes('application_id')) continue; // ID collision, try again
         return res.status(409).json({
           error: 'DUPLICATE',
-          message: 'An application with this email or WhatsApp number already exists.',
+          message: 'An application with this WhatsApp number or email already exists.',
         });
       }
 
@@ -330,7 +336,7 @@ app.get('/api/admin/submissions', authenticateAdmin, async (req, res) => {
   try {
     let query = supabase
       .from('eoi_applications')
-      .select('id, application_id, full_name, email, whatsapp, city, state, occupation, status, submitted_at');
+      .select('id, application_id, full_name, email, whatsapp, secondary_no, city, state, occupation, status, submitted_at');
 
     if (typeof search === 'string' && search.trim()) {
       // strip characters that have meaning inside a PostgREST .or() filter
@@ -430,6 +436,22 @@ app.patch('/api/admin/submissions/:refId/status', authenticateAdmin, async (req,
     return res.status(500).json({ error: 'Failed to update application status' });
   }
 });
+
+// ============================================================
+// SERVE THE BUILT WEBSITE (Frontend/dist) FROM THIS SAME SERVER
+// ============================================================
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DIST = process.env.FRONTEND_DIST || path.resolve(__dirname, '../Frontend/dist');
+
+if (fs.existsSync(path.join(DIST, 'index.html'))) {
+  app.use(express.static(DIST));
+  // any non-API address (/, /admin, ...) returns the single-page app
+  app.get(/^\/(?!api\/).*/, (req, res) => res.sendFile(path.join(DIST, 'index.html')));
+  console.log(`Serving website from ${DIST}`);
+} else {
+  console.log(`No built website found at ${DIST} (run "npm run build" in the Frontend folder). API only.`);
+}
 
 // ============================================================
 // 404 + ERROR HANDLER

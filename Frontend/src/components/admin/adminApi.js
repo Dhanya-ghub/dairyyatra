@@ -1,8 +1,6 @@
-// src/components/admin/adminApi.js
-const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:5000' : '');
 const TOKEN_KEY = 'dy_admin_token';
 
-// sessionStorage: the login is forgotten when the browser tab is closed
 export const getToken = () => sessionStorage.getItem(TOKEN_KEY);
 export const clearToken = () => sessionStorage.removeItem(TOKEN_KEY);
 const setToken = (t) => sessionStorage.setItem(TOKEN_KEY, t);

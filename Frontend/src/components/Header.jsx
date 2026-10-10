@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Menu, X, ChevronRight } from 'lucide-react';
+import AdminAccess from './admin/Adminaccess';
 
 // Brochure file (public folder). Change it here and it updates everywhere in the header.
 const BROCHURE_URL = '/Dairy_Yatra_2025_Brochure.pdf';
@@ -56,28 +57,14 @@ export default function Header({ onOpenApply }) {
           ? 'bg-white/90 backdrop-blur-md py-3 shadow-[0_1px_12px_rgba(15,23,42,0.08)]'
           : 'bg-white py-3.5'
       }`}
-      /* 6% each side matches the 88% width the hero spreads its photo columns across */
-      style={{ paddingLeft: 'max(16px, 6%)', paddingRight: 'max(16px, 6%)' }}
+      /* Everything sits against the right edge. Raise the 2% if you want a little more gap. */
+      style={{ paddingLeft: 'max(16px, 2%)', paddingRight: 'max(16px, 2%)' }}
     >
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full flex items-center justify-end">
 
-        {/* 1. LEFT: LOGO & BRANDING */}
-        <a href="#" className="flex items-center gap-3.5 group shrink-0">
-          <div className="w-12 h-12 min-w-[48px] flex items-center justify-center overflow-hidden rounded-xl bg-white p-0.5 border border-[#E2E8F0] shadow-xs group-hover:scale-105 transition-transform duration-300">
-            <img
-              src="/logo.jpeg"
-              alt="Dairy Yatra Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
-          <span className="font-sans text-base sm:text-lg lg:text-xl font-black tracking-tight text-[#1B2A4A] leading-none">
-            DAIRY YATRA 2027
-          </span>
-        </a>
-
-        {/* 2. RIGHT (desktop): NAV LINKS, BROCHURE LINK, MAIN BUTTON */}
-        <div className="hidden lg:flex items-center gap-5 xl:gap-7 justify-end">
-          <nav className="flex items-center gap-5 xl:gap-8">
+        {/* DESKTOP: NAV LINKS, BROCHURE LINK, MAIN BUTTON, ADMIN LOCK (all on the right) */}
+        <div className="hidden lg:flex items-center gap-3 xl:gap-4 justify-end">
+          <nav className="flex items-center gap-4 xl:gap-5">
             {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.id;
               return (
@@ -117,10 +104,13 @@ export default function Header({ onOpenApply }) {
             <span>Expression of Interest</span>
             <ChevronRight className="w-4 h-4" />
           </button>
+
+          {/* Admin login: lock icon next to the main button */}
+          <AdminAccess iconOnly className="flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:text-[#2B6CB0] hover:bg-slate-100 transition-colors cursor-pointer" />
         </div>
 
         {/* Medium screens (sm to lg): nav hidden, show brochure link and main button */}
-        <div className="hidden sm:flex lg:hidden items-center gap-4">
+        <div className="hidden sm:flex lg:hidden items-center gap-3">
           <a
             href={BROCHURE_URL}
             download
@@ -136,6 +126,7 @@ export default function Header({ onOpenApply }) {
             <span>Expression of Interest</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
+          <AdminAccess iconOnly className="flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:text-[#2B6CB0] hover:bg-slate-100 transition-colors cursor-pointer" />
         </div>
 
         {/* Mobile hamburger */}
@@ -171,6 +162,8 @@ export default function Header({ onOpenApply }) {
           >
             <Download className="w-4 h-4" /> Brochure
           </a>
+
+          <AdminAccess className="flex items-center gap-2 text-xs font-bold tracking-[0.05em] uppercase py-2.5 text-slate-600 hover:text-[#2B6CB0] transition-colors cursor-pointer" />
 
           <button
             onClick={() => {

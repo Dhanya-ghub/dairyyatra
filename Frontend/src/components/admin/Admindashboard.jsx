@@ -4,8 +4,8 @@ import { fetchApplications, fetchApplication, updateApplication, AuthError } fro
 
 const STATUSES = ['SUBMITTED', 'SHORTLISTED', 'WAITLISTED', 'REJECTED'];
 
-// Display only. The real limit is enforced by the server (SEAT_LIMIT in the backend .env, default 30).
-const SEAT_LIMIT = 30;
+// Display only. The real limit is enforced by the server (SEAT_LIMIT in the backend .env, default 35).
+const SEAT_LIMIT = 35;
 
 const STATUS_LABEL = {
   SUBMITTED: 'Submitted',
@@ -39,6 +39,7 @@ function exportCsv(rows) {
     ['Name', 'full_name'],
     ['Email', 'email'],
     ['WhatsApp', 'whatsapp'],
+    ['Secondary number', 'secondary_no'],
     ['City', 'city'],
     ['State', 'state'],
     ['Occupation', 'occupation'],
@@ -168,7 +169,7 @@ export default function AdminDashboard({ onLogout }) {
         ['Gender', d.gender],
         ['WhatsApp', d.whatsapp],
         ['Secondary number', d.secondaryNo],
-        ['Email', d.email],
+        ['Email', d.email || 'Not provided'],
         ['Address', [d.address, d.city, d.state].filter(Boolean).join(', ')],
         ['Occupation', d.occupation],
         ['Organization', d.organization],
@@ -283,7 +284,7 @@ export default function AdminDashboard({ onLogout }) {
                     <td className="px-4 py-3 font-mono text-xs">{a.application_id}</td>
                     <td className="px-4 py-3">
                       <div className="font-semibold">{a.full_name}</div>
-                      <div className="text-xs text-[#4E657D]">{a.email}</div>
+                      <div className="text-xs text-[#4E657D]">{a.email || 'No email'}</div>
                     </td>
                     <td className="px-4 py-3">{a.whatsapp}</td>
                     <td className="px-4 py-3">{[a.city, a.state].filter(Boolean).join(', ')}</td>

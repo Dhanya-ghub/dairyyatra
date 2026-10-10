@@ -29,16 +29,16 @@ Object.entries(modules).forEach(([path, src]) => {
 const LOGO_SRC = '/logo.png';
 
 const GALLERY = [
-  { image: 1, left: 5.5, top: 76, rotate: 10, size: 8.2 },
-  { image: 2, left: 15.4, top: 57, rotate: 9, size: 8.2 },
-  { image: 3, left: 25.3, top: 39, rotate: 7, size: 8.2 },
-  { image: 4, left: 35.2, top: 24, rotate: 5, size: 8 },
-  { image: 5, left: 45.1, top: 17, rotate: 2, size: 7.8 },
-  { image: 6, left: 54.9, top: 17, rotate: -2, size: 7.8 },
-  { image: 7, left: 64.8, top: 24, rotate: -5, size: 8 },
-  { image: 8, left: 74.7, top: 39, rotate: -7, size: 8.2 },
-  { image: 9, left: 84.6, top: 57, rotate: -9, size: 8.2 },
-  { image: 10, left: 94.5, top: 76, rotate: -10, size: 8.2 },
+  { image: 1, left: 5.5, top: 76, rotate: 0, size: 9.2 },
+  { image: 2, left: 15.4, top: 57, rotate: 0, size: 9.2 },
+  { image: 3, left: 25.3, top: 39, rotate: 0, size: 9.2 },
+  { image: 4, left: 35.2, top: 24, rotate: 0, size: 9 },
+  { image: 5, left: 45.1, top: 17, rotate: 0, size: 8.8 },
+  { image: 6, left: 54.9, top: 17, rotate: 0, size: 8.8 },
+  { image: 7, left: 64.8, top: 24, rotate: 0, size: 9 },
+  { image: 8, left: 74.7, top: 39, rotate: 0, size: 9.2 },
+  { image: 9, left: 84.6, top: 57, rotate: 0, size: 9.2 },
+  { image: 10, left: 94.5, top: 76, rotate: 0, size: 9.2 },
 ];
 
 /* ---------- Photo card ---------- */
@@ -202,14 +202,14 @@ export default function Hero({ onOpenApply }) {
           position: absolute;
           width: var(--photo-size, 10.5%);
           min-width: 52px;
-          max-width: 118px;
+          max-width: 132px;
           border-radius: 18px;
           transform-origin: 50% 50%;
           transform: translate(-50%, -50%) rotate(var(--photo-rotation));
           transition: transform .25s ease, box-shadow .25s ease;
           z-index: 1;
         }
-        .dy-hero-photo:hover { transform: translate(-50%, calc(-50% - 5px)) rotate(0deg) scale(1.04); }
+        .dy-hero-photo:hover { transform: translate(-50%, calc(-50% - 5px)) rotate(0deg) scale(1.06); }
         .dy-hero__tagline {
           max-width: 80ch;
           margin: 8px 12px 0;
@@ -222,7 +222,7 @@ export default function Hero({ onOpenApply }) {
         .dy-hero__brand {
           position: absolute;
           z-index: 3;
-          top: 45%;
+          top: 37%;
           left: 50%;
           display: flex;
           width: 100%;
@@ -231,7 +231,7 @@ export default function Hero({ onOpenApply }) {
           align-items: center;
           text-align: center;
         }
-        .dy-hero__logo { width: 220px; height: auto; clip-path: inset(1.5% 0); transform: translateY(-16px); }
+        .dy-hero__logo { width: 250px; height: auto; clip-path: inset(1.5% 0); transform: translateY(-31px); }
         .dy-hero__year {
           margin: 0;
           color: #172738;
@@ -283,8 +283,8 @@ export default function Hero({ onOpenApply }) {
           .dy-hero__layout { display: flex; flex-direction: column; gap: 10px; }
           .dy-hero__main { min-height: 390px; flex: 1 1 auto; }
           .dy-hero-photo { min-width: 0; border-radius: 13px; }
-          .dy-hero__brand { top: 48%; width: 100%; }
-          .dy-hero__logo { width: clamp(122px, 32vw, 150px); transform: translateY(-14px); }
+          .dy-hero__brand { top: 40%; width: 100%; }
+          .dy-hero__logo { width: clamp(122px, 32vw, 150px); transform: translateY(-24px); }
           .dy-hero__year { font-size: 22px; transform: translateY(-26px); }
           .dy-hero__subtitle { margin-top: 6px; font-size: clamp(15px, 4.5vw, 18px); }
           .dy-hero__tagline { margin: 7px 16px 0; font-size: 10px; }
@@ -302,7 +302,7 @@ export default function Hero({ onOpenApply }) {
           .dy-hero__stats .dy-stat-item > div:last-child { max-width: 16ch; font-size: 10px !important; }
         }
         @media (max-width: 380px) {
-          .dy-hero__brand { top: 37%; }
+          .dy-hero__brand { top: 29%; }
           .dy-hero__subtitle { font-size: 15px; }
           .dy-hero__tagline { font-size: 10px; }
           .dy-hero__stats .dy-stat-item > div:last-child { font-size: 9px !important; }
@@ -312,8 +312,8 @@ export default function Hero({ onOpenApply }) {
           .dy-hero__layout { display: grid; grid-template-columns: minmax(0, 1fr) 128px; height: 100%; gap: 8px; }
           .dy-hero__main { height: auto; min-height: 0; }
           .dy-hero-photo { max-width: 118px; }
-          .dy-hero__brand { top: 34%; }
-          .dy-hero__logo { width: 104px; transform: translateY(-6px); }
+          .dy-hero__brand { top: 26%; }
+          .dy-hero__logo { width: 104px; transform: translateY(-16px); }
           .dy-hero__year { font-size: 16px; transform: translateY(-20px); }
           .dy-hero__subtitle { margin-top: 4px; font-size: 15px; }
           .dy-hero__tagline { margin-top: 5px; font-size: 9px; }

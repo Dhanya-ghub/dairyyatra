@@ -71,15 +71,6 @@ export default function Footer({ onOpenApply }) {
                   <a href="mailto:info@dairyyatra.in" className="flex items-center gap-2 text-sm text-white hover:text-[#66A3BF] transition-colors">
                     <Mail className="w-4 h-4 text-[#66A3BF]" /> info@dairyyatra.in / apply@dairyyatra.in
                   </a>
-                  <a
-                    href="https://www.instagram.com/dairy.yatra?mdxt=MTZjOHp5c2NyYng0cQ=="
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Dairy Yatra on Instagram (opens in a new tab)"
-                    className="text-[#66A3BF] transition-colors hover:text-white"
-                  >
-                    <Instagram className="h-4 w-4" />
-                  </a>
                 </div>
                 <span className="flex items-center gap-2 text-sm text-white/80">
                   <Phone className="w-4 h-4 text-[#66A3BF]" /> Phone:
@@ -87,6 +78,15 @@ export default function Footer({ onOpenApply }) {
                 <span className="flex items-center gap-2 text-xs text-[#F2EFE7]/70">
                   <MapPin className="w-4 h-4 text-[#66A3BF]" /> Headquarters: Coimbatore
                 </span>
+                <a
+                  href="https://www.instagram.com/dairy.yatra?mdxt=MTZjOHp5c2NyYng0cQ=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Dairy Yatra on Instagram (opens in a new tab)"
+                  className="flex items-center gap-2 text-xs text-[#F2EFE7]/70 transition-colors hover:text-white"
+                >
+                  <Instagram className="h-4 w-4 text-[#66A3BF]" /> Instagram
+                </a>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">

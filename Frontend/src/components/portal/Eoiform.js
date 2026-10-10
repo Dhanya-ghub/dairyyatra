@@ -62,12 +62,8 @@ export function validateEoiStep(step, d) {
     if (!d.gender) e.gender = 'Select your gender';
     if (!PHONE.test((d.whatsapp || '').trim())) e.whatsapp = 'Enter a valid 10-digit WhatsApp number';
     if (d.secondaryNo && !PHONE.test(d.secondaryNo.trim())) e.secondaryNo = 'Enter a valid 10-digit number or leave it empty';
-<<<<<<< HEAD
-    if (d.email && d.email.trim() && !EMAIL.test(d.email.trim())) e.email = 'Enter a valid email address or leave it empty';
-=======
     const email = (d.email || '').trim();
-    if (email && !EMAIL.test(email)) e.email = 'Enter a valid email address';
->>>>>>> ec1671624ebafb154da7009af5ef6fa31ea4bf71
+    if (email && !EMAIL.test(email)) e.email = 'Enter a valid email address or leave it empty';
     if (!d.address || d.address.trim().length < 10) e.address = 'Enter your residential address';
     if (!d.city || !d.city.trim()) e.city = 'City is required';
     if (!d.state) e.state = 'State is required';

@@ -4,13 +4,11 @@ import ScrollReveal from './ScrollReveal';
 
 /* ---------- Easy settings ---------- */
 const SHOW_HERO_CTA = false;                           // true = show the Expression of Interest button under the subtitle
-const HEADER_HEIGHT = '80px';                          // height of your sticky header
-const SIZE_DIVISOR = 5.4;                              // LOWER = bigger photos (6.5 = old size, fits one screen; 5.4 = bigger, hero may scroll a little)
-const LOGO_WIDTH = 2.6;                                // logo width in photo-card widths
+const HEADER_HEIGHT = '66px';                          // height of your sticky header
 
 /* Stats bar numbers. amber = shown in gold. */
 const STATS = [
-  { value: 5,    label: 'States' },
+  { value: 5,    label: 'States', amber: true },
   { value: 15,   label: 'Days', amber: true },
   { value: 15,   label: 'Farms, institutions & businesses', wide: true },
   { value: 40,   label: 'Entrepreneurs', amber: true },
@@ -28,38 +26,32 @@ Object.entries(modules).forEach(([path, src]) => {
   if (/^\d+\./.test(name)) BY_NUMBER[parseInt(name, 10)] = src;
 });
 
-/* Logo: save it as src/assets/logo.png (or .jpg / .jpeg / .webp / .svg).
-   If the file is missing the logo slot just shows the text "Dairy Yatra 2027". */
-const logoModules = import.meta.glob('../assets/logo.{png,jpg,jpeg,webp,svg}', { eager: true, import: 'default' });
-const LOGO_SRC = Object.values(logoModules)[0];
+const LOGO_SRC = '/logo.png';
 
-/* Seven staggered columns: 3 photo columns, the LOGO, then 3 photo columns.
-   k     = how far down the first card hangs (in card widths)
-   cards = photo numbers stacked in that column
-   show  = phones show the logo + 1 column each side, tablets 2 each side, desktop 3 each side */
-const COLUMNS = [
-  { k: 0.9,  cards: [1, 2],   show: 'hidden lg:flex' },
-  { k: 0.46, cards: [3, 4],   show: 'hidden md:flex' },
-  { k: 1.0,  cards: [5],      show: 'flex' },
-  { logo: true },
-  { k: 0.81, cards: [6],      show: 'flex' },
-  { k: 0.46, cards: [7, 8],   show: 'hidden md:flex' },
-  { k: 0.9,  cards: [9, 10],  show: 'hidden lg:flex' },
+const GALLERY = [
+  { image: 1, left: 5.5, top: 76, rotate: 0, size: 9.2 },
+  { image: 2, left: 15.4, top: 57, rotate: 0, size: 9.2 },
+  { image: 3, left: 25.3, top: 39, rotate: 0, size: 9.2 },
+  { image: 4, left: 35.2, top: 24, rotate: 0, size: 9 },
+  { image: 5, left: 45.1, top: 17, rotate: 0, size: 8.8 },
+  { image: 6, left: 54.9, top: 17, rotate: 0, size: 8.8 },
+  { image: 7, left: 64.8, top: 24, rotate: 0, size: 9 },
+  { image: 8, left: 74.7, top: 39, rotate: 0, size: 9.2 },
+  { image: 9, left: 84.6, top: 57, rotate: 0, size: 9.2 },
+  { image: 10, left: 94.5, top: 76, rotate: 0, size: 9.2 },
 ];
 
-const V_GAP = 'calc(var(--cw) * 0.085)';   // space between cards inside a column
-
 /* ---------- Photo card ---------- */
-function PhotoCard({ n, delay }) {
+function PhotoCard({ n, delay, style }) {
   const src = BY_NUMBER[n];
   return (
     <div
-      className={`dy-card relative overflow-hidden rounded-xl transition-transform duration-300 ease-out will-change-transform sm:rounded-2xl ${
+      className={`dy-card dy-hero-photo relative overflow-hidden rounded-xl transition-transform duration-300 ease-out will-change-transform sm:rounded-2xl ${
         src
-          ? 'shadow-[0_6px_18px_rgba(0,0,0,0.14)] hover:z-10 hover:shadow-[0_16px_36px_rgba(0,0,0,0.28)] hover:[transform:perspective(700px)_rotateY(-8deg)_rotateX(4deg)_scale(1.07)]'
+          ? 'shadow-[0_8px_20px_rgba(23,39,56,0.18)] hover:z-10 hover:shadow-[0_16px_36px_rgba(23,39,56,0.25)]'
           : 'bg-gradient-to-b from-[#EFEFEF] to-[#F7F7F7]'
       }`}
-      style={{ aspectRatio: '4 / 5', animationDelay: `${delay}ms` }}
+      style={{ ...style, aspectRatio: '4 / 5', animationDelay: `${delay}ms` }}
     >
       {src && (
         <img
@@ -70,37 +62,6 @@ function PhotoCard({ n, delay }) {
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
-      )}
-    </div>
-  );
-}
-
-/* ---------- Logo card (centre of the page) ---------- */
-function LogoCard({ delay }) {
-  return (
-    <div
-      className="dy-card flex items-center justify-center overflow-hidden rounded-2xl bg-[#F6F0E2] shadow-[0_10px_28px_rgba(0,0,0,0.16)]"
-      style={{
-        width: `calc(var(--cw) * ${LOGO_WIDTH})`,
-        aspectRatio: '27 / 20',
-        marginTop: 'calc(var(--cw) * 0.3)',
-        animationDelay: `${delay}ms`,
-      }}
-    >
-      {LOGO_SRC ? (
-        <img
-          src={LOGO_SRC}
-          alt="Dairy Yatra 2027 - Exploring Dairy Entrepreneurship in India"
-          draggable="false"
-          className="h-full w-full object-contain"
-        />
-      ) : (
-        <span
-          className="px-2 text-center font-bold text-[#1B2A4A]"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 'calc(var(--cw) * 0.28)' }}
-        >
-          Dairy Yatra 2027
-        </span>
       )}
     </div>
   );
@@ -133,7 +94,7 @@ function StatItem({ stat, seen }) {
   const val = useCountUp(stat.value, seen);
   return (
     <div
-      className={`flex flex-col items-center justify-center px-2 text-center md:border-l md:border-white/15 md:first:border-l-0 ${
+      className={`dy-stat-item flex flex-col items-center justify-center px-2 text-center md:border-l md:border-white/15 md:first:border-l-0 ${
         stat.wide ? 'md:flex-[1.7]' : 'md:flex-1'
       }`}
     >
@@ -189,7 +150,7 @@ function StatsBar() {
   return (
     <div
       ref={ref}
-      className="mx-auto grid w-full grid-cols-3 gap-y-5 rounded-2xl border border-white/5 bg-[#1A1A1A] shadow-[0_10px_30px_rgba(0,0,0,0.25)] md:flex md:items-stretch md:gap-y-0"
+      className="dy-stats-bar mx-auto grid w-full grid-cols-3 gap-y-5 rounded-2xl border border-white/5 bg-[#1A1A1A] shadow-[0_10px_30px_rgba(0,0,0,0.25)] md:flex md:items-stretch md:gap-y-0"
       style={{
         maxWidth: 'min(100%, max(70vw, 640px), 1180px)',
         padding: 'clamp(14px, 1.6vw, 24px) clamp(8px, 1vw, 16px)',
@@ -206,123 +167,208 @@ function StatsBar() {
 export default function Hero({ onOpenApply }) {
   return (
     <section
-      className="dy-hero relative overflow-hidden bg-white font-sans select-none"
-      style={{
-        '--hh': HEADER_HEIGHT,
-        /* One size unit drives the whole layout: as wide as the screen allows
-           (--u = total width in card units, logo included), limited by height. */
-        '--cw': `clamp(66px, min(calc(88vw / var(--u)), calc((100svh - var(--hh)) / ${SIZE_DIVISOR})), 280px)`,
-      }}
+      className="dy-hero relative overflow-visible font-sans"
+      style={{ '--hh': HEADER_HEIGHT }}
     >
       <style>{`
-        /* --n = number of columns shown (logo included), --u = their total width in card units */
-        .dy-hero { --n: 3; --u: ${2 + LOGO_WIDTH}; }
-        @media (min-width: 768px)  { .dy-hero { --n: 5; --u: ${4 + LOGO_WIDTH}; } }
-        @media (min-width: 1024px) { .dy-hero { --n: 7; --u: ${6 + LOGO_WIDTH}; } }
+        .dy-hero {
+          height: calc(100svh - var(--hh));
+          min-height: 0;
+          box-sizing: border-box;
+          padding: clamp(8px, 1.6vh, 16px) clamp(16px, 3.4vw, 54px);
+          color: #172738;
+          background-color: #fbfaf6;
+          background-image: radial-gradient(rgba(23,39,56,.11) .8px, transparent .9px);
+          background-size: 22px 22px;
+        }
+        .dy-hero__layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) clamp(154px, 17vw, 190px);
+          align-items: stretch;
+          gap: clamp(14px, 2.2vw, 30px);
+          width: min(100%, 1600px);
+          height: 100%;
+          margin: 0 auto;
+        }
+        .dy-hero__main {
+          position: relative;
+          min-width: 0;
+          min-height: 0;
+          overflow: visible;
+          container-type: inline-size;
+        }
+        .dy-hero__gallery { position: absolute; inset: 0; }
+        .dy-hero-photo {
+          position: absolute;
+          width: var(--photo-size, 10.5%);
+          min-width: 52px;
+          max-width: 132px;
+          border-radius: 18px;
+          transform-origin: 50% 50%;
+          transform: translate(-50%, -50%) rotate(var(--photo-rotation));
+          transition: transform .25s ease, box-shadow .25s ease;
+          z-index: 1;
+        }
+        .dy-hero-photo:hover { transform: translate(-50%, calc(-50% - 5px)) rotate(0deg) scale(1.06); }
+        .dy-hero__tagline {
+          max-width: 80ch;
+          margin: 8px 12px 0;
+          color: #3368A0;
+          font: 600 clamp(11px, .95vw, 13px)/1.4 "DM Sans", system-ui, sans-serif;
+          letter-spacing: .015em;
+          text-align: center;
+          transform: translateY(-9px);
+        }
+        .dy-hero__brand {
+          position: absolute;
+          z-index: 3;
+          top: 37%;
+          left: 50%;
+          display: flex;
+          width: 100%;
+          transform: translateX(-50%);
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .dy-hero__logo { width: 250px; height: auto; clip-path: inset(1.5% 0); transform: translateY(-31px); }
+        .dy-hero__year {
+          margin: 0;
+          color: #172738;
+          font: 700 clamp(23px, 2.4vw, 30px)/1.1 "Playfair Display", Georgia, serif;
+          letter-spacing: .015em;
+          transform: translateY(-28px);
+        }
+        .dy-hero__subtitle {
+          max-width: none;
+          margin: 8px 0 0;
+          color: #172738;
+          font: 700 clamp(20px, 2.5vw, 32px)/1.02 "Playfair Display", Georgia, serif;
+          letter-spacing: -.035em;
+          white-space: nowrap;
+          transform: translateY(-9px);
+        }
+        .dy-hero__stats { align-self: center; display: flex; width: 100%; height: min(100%, 560px); }
+        .dy-hero__stats > div { display: flex; width: 100%; }
+        .dy-hero__stats .dy-stats-bar {
+          display: flex;
+          width: 100%;
+          flex: 1;
+          max-width: none !important;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 0;
+          padding: 12px 10px !important;
+          border-color: rgba(255,255,255,.08);
+          border-radius: 20px;
+          background: #202326;
+        }
+        .dy-hero__stats .dy-stat-item {
+          width: 100%;
+          flex: 1;
+          border-left: 0;
+          border-top: 1px solid rgba(255,255,255,.14);
+          padding: 5px 2px;
+        }
+        .dy-hero__stats .dy-stat-item:first-child { border-top: 0; }
+        .dy-hero__stats .dy-stat-item > div:first-child { text-shadow: none !important; }
+        .dy-hero__stats .dy-stat-item > div:last-child { max-width: 16ch; }
         @keyframes dyCardIn {
-          from { opacity: 0; transform: translateY(-28px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; translate: 0 -12px; }
+          to   { opacity: 1; translate: 0 0; }
         }
         .dy-card { animation: dyCardIn 700ms cubic-bezier(.22,.8,.3,1) backwards; }
+        @media (max-width: 760px) {
+          .dy-hero { min-height: 0; padding: 8px 12px 12px; }
+          .dy-hero__layout { display: flex; flex-direction: column; gap: 10px; }
+          .dy-hero__main { min-height: 390px; flex: 1 1 auto; }
+          .dy-hero-photo { min-width: 0; border-radius: 13px; }
+          .dy-hero__brand { top: 40%; width: 100%; }
+          .dy-hero__logo { width: clamp(122px, 32vw, 150px); transform: translateY(-24px); }
+          .dy-hero__year { font-size: 22px; transform: translateY(-26px); }
+          .dy-hero__subtitle { margin-top: 6px; font-size: clamp(15px, 4.5vw, 18px); }
+          .dy-hero__tagline { margin: 7px 16px 0; font-size: 10px; }
+          .dy-hero__stats { height: auto; flex: 0 0 auto; }
+          .dy-hero__stats .dy-stats-bar {
+            display: grid;
+            min-height: 154px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            padding: 8px 6px !important;
+            border-radius: 16px;
+          }
+          .dy-hero__stats .dy-stat-item { border: 0; padding: 5px 2px; }
+          .dy-hero__stats .dy-stat-item:nth-child(n + 4) { border-top: 1px solid rgba(255,255,255,.14); }
+          .dy-hero__stats .dy-stat-item > div:first-child { font-size: clamp(20px, 6vw, 26px) !important; }
+          .dy-hero__stats .dy-stat-item > div:last-child { max-width: 16ch; font-size: 10px !important; }
+        }
+        @media (max-width: 380px) {
+          .dy-hero__brand { top: 29%; }
+          .dy-hero__subtitle { font-size: 15px; }
+          .dy-hero__tagline { font-size: 10px; }
+          .dy-hero__stats .dy-stat-item > div:last-child { font-size: 9px !important; }
+        }
+        @media (max-height: 500px) and (max-width: 760px) {
+          .dy-hero { height: calc(100svh - var(--hh)); padding: 8px 12px; }
+          .dy-hero__layout { display: grid; grid-template-columns: minmax(0, 1fr) 128px; height: 100%; gap: 8px; }
+          .dy-hero__main { height: auto; min-height: 0; }
+          .dy-hero-photo { max-width: 118px; }
+          .dy-hero__brand { top: 26%; }
+          .dy-hero__logo { width: 104px; transform: translateY(-16px); }
+          .dy-hero__year { font-size: 16px; transform: translateY(-20px); }
+          .dy-hero__subtitle { margin-top: 4px; font-size: 15px; }
+          .dy-hero__tagline { margin-top: 5px; font-size: 9px; }
+          .dy-hero__stats .dy-stats-bar { display: flex; min-height: 0; padding: 6px 4px !important; }
+          .dy-hero__stats .dy-stat-item { padding: 3px 1px; }
+          .dy-hero__stats .dy-stat-item > div:first-child { font-size: 21px !important; }
+          .dy-hero__stats .dy-stat-item > div:last-child { font-size: 9px !important; }
+        }
         @media (prefers-reduced-motion: reduce) {
           .dy-card { animation: none; transition: none; }
         }
       `}</style>
 
-      {/* Photo columns hanging from the top edge, logo in the middle */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 z-0 overflow-hidden"
-        style={{ height: 'calc(var(--cw) * 5.2)' }}
-      >
-        <div
-          className="mx-auto flex h-full items-start justify-center"
-          style={{
-            columnGap: 'max(calc(var(--cw) * 0.085), calc((88% - var(--u) * var(--cw)) / (var(--n) - 1)))',
-          }}
-        >
-          {COLUMNS.map((col, ci) => {
-            if (col.logo) {
-              return <LogoCard key="logo" delay={ci * 80} />;
-            }
-            return (
-              <div key={ci} className={`${col.show} flex-col`} style={{ width: 'var(--cw)', rowGap: V_GAP }}>
-                {/* blank card hanging from the top edge */}
-                <div
-                  className="dy-card rounded-b-xl bg-gradient-to-b from-[#ECECEC] to-[#F8F8F8] shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:rounded-b-2xl"
-                  style={{ height: `calc(var(--cw) * ${col.k})`, animationDelay: `${ci * 80}ms` }}
-                />
-                {col.cards.map((n, ri) => (
-                  <PhotoCard key={n} n={n} delay={ci * 80 + (ri + 1) * 120} />
-                ))}
-                {/* faint hairline under each column */}
-                <div
-                  className="mx-auto w-px"
-                  style={{
-                    height: 'calc(var(--cw) * 1.3)',
-                    background: `linear-gradient(to bottom, ${
-                      ci === 1 || ci === 5 ? 'rgba(235,150,80,0.30)' : 'rgba(0,0,0,0.07)'
-                    }, rgba(0,0,0,0))`,
-                  }}
-                />
-              </div>
-            );
-          })}
+      <div className="dy-hero__layout">
+        <div className="dy-hero__main">
+          <div className="dy-hero__gallery" aria-label="Dairy Yatra journey photographs">
+            {GALLERY.map((photo, index) => (
+              <PhotoCard
+                key={photo.image}
+                n={photo.image}
+                delay={index * 80}
+                style={{
+                  left: `${photo.left}%`,
+                  top: `${photo.top}%`,
+                  '--photo-rotation': `${photo.rotate}deg`,
+                  '--photo-size': `${photo.size}%`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="dy-hero__brand">
+            <img className="dy-hero__logo" src={LOGO_SRC} alt="Dairy Yatra logo" draggable="false" />
+            <p className="dy-hero__year">2027</p>
+            <h2 className="dy-hero__subtitle">Experience the journey beyond dairy</h2>
+            <p className="dy-hero__tagline">
+              Travel across India. Meet the people behind dairy. Discover ideas that can transform the way we farm, produce, and grow.
+            </p>
+            {SHOW_HERO_CTA && (
+              <button
+                onClick={onOpenApply}
+                className="pointer-events-auto mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#3368A0] px-5 py-2 text-[12px] font-bold uppercase tracking-[0.05em] text-white transition-colors hover:bg-[#24527f]"
+              >
+                <span>Expression of Interest</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Text block: starts just below the logo */}
-      <div
-        className="pointer-events-none relative z-10 flex flex-col items-center px-4 text-center"
-        style={{ paddingTop: 'calc(var(--cw) * 2.95)' }}
-      >
-        <ScrollReveal animation="fade-up" delay={160} duration={600}>
-          <h1
-            className="font-bold leading-[1.08] tracking-tight"
-            style={{
-              fontFamily: '"Playfair Display", "Cinzel", "Cormorant Garamond", Georgia, serif',
-              fontSize: 'max(24px, calc(var(--cw) * 0.42))',
-            }}
-          >
-            <span className="block text-[#111111]">Experience the journey</span>
-            <span className="block text-[#878787]">beyond dairy</span>
-          </h1>
-        </ScrollReveal>
-
-        <ScrollReveal animation="fade-up" delay={220} duration={600}>
-          <p
-            className="mx-auto leading-relaxed text-[#1F2937]"
-            style={{
-              fontSize: 'max(12px, calc(var(--cw) * 0.17))',
-              maxWidth: 'min(100%, calc(var(--cw) * 6.2))',
-              marginTop: 'calc(var(--cw) * 0.2)',
-            }}
-          >
-            Travel across India. Meet the people behind dairy. Discover ideas that can transform the way we farm, produce, and grow.
-          </p>
-        </ScrollReveal>
-
-        {SHOW_HERO_CTA && (
-          <ScrollReveal animation="fade-up" delay={280} duration={600}>
-            <button
-              onClick={onOpenApply}
-              className="pointer-events-auto mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#2B6CB0] px-5 py-2 text-[12px] font-bold uppercase tracking-[0.05em] text-white transition-colors hover:bg-[#1E56A0]"
-            >
-              <span>Expression of Interest</span>
-              <ChevronRight className="h-4 w-4" />
-            </button>
+        <div className="dy-hero__stats relative z-10">
+          <ScrollReveal animation="fade-up" delay={300} duration={600}>
+            <StatsBar />
           </ScrollReveal>
-        )}
-      </div>
-
-      {/* Stats bar: solid dark card directly under the text */}
-      <div
-        className="relative z-10 px-4 sm:px-6"
-        style={{ marginTop: 'calc(var(--cw) * 0.3)', paddingBottom: 'calc(var(--cw) * 0.3)' }}
-      >
-        <ScrollReveal animation="fade-up" delay={300} duration={600}>
-          <StatsBar />
-        </ScrollReveal>
+        </div>
       </div>
     </section>
   );

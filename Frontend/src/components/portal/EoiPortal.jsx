@@ -192,7 +192,12 @@ export default function EoiPortal({ isOpen, onClose }) {
             <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#C8DFDB] shadow-xl">
               {currentStep === 1 && <Step1Profile formData={formData} setFormData={setFormData} errors={errors} />}
               {currentStep === 2 && (
-                <Step2DairyExperience formData={formData} setFormData={setFormData} errors={errors} />
+                <Step2DairyExperience
+                  formData={formData}
+                  setFormData={setFormData}
+                  setErrors={setErrors}
+                  errors={errors}
+                />
               )}
 
               <div className="pt-10 mt-10 border-t border-[#C8DFDB] flex flex-col sm:flex-row items-center justify-between gap-4">

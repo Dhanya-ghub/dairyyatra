@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import alumnusThreePhoto from '../assets/a3.jpeg';
 
 /* Alumni photos: put the image files in  src/assets/alumni/  (a file straight in src/assets/ also works).
    In the list below, just write the file name, e.g.  photo: 'a1.jpeg'
@@ -31,28 +32,14 @@ const photoUrl = (file) => {
   return key ? PHOTO_FILES[key] : '';
 };
 
-/* 👉 EDIT THIS LIST with your real alumni (only add people who are ready to be shown).
-   Up to 6 people are shown together; with more, the extra people appear on the next page. */
+/* 👉 Replace the two placeholder entries with alumni details when they're ready to be shown. */
 const ALUMNI = [
   { name: 'Shanthra P', role: 'CEO, Pariyur FPO', quote: 'Great learning journey filled with new experiences and memories', photo: 'a1.jpeg' },
   { name: 'Ragotham', role: 'Student, KCT-BS (Agri)', quote: 'I had a great learning experience by visiting and gaining practical exposure to various dairy units and institutions.', photo: 'a2.jpeg' },
-  { name: 'Arunkumar Krishnamoorthy', role: 'Senior Executive', quote: 'Across fertile plains and pastoral trails: a journey into the heart of Indias living dairy heritage.', photo: 'a3.jpeg' },
-
-  // { name: 'Full name', role: 'Role, Organisation', quote: 'One or two sentences.', photo: 'a3.jpeg' },
+  { name: 'Arunkumar Krishnamoorthy', role: 'Senior Executive', quote: 'Across fertile plains and pastoral trails: a journey into the heart of Indias living dairy heritage.', photo: alumnusThreePhoto },
+  { name: 'Alumni 04', role: 'Role, Organisation', quote: "Add this alumnus's Yatra experience and testimonial here.", photo: '' },
+  { name: 'Alumni 05', role: 'Role, Organisation', quote: "Add this alumnus's Yatra experience and testimonial here.", photo: '' },
 ];
-
-const PER_PAGE = 6;
-
-/* Where the tilted photos sit, for a page of 1 to 6 people.
-   Each slot is [left %, top %, tilt in degrees]; w is the photo width as a % of the whole cluster. */
-const LAYOUTS = {
-  1: { w: 46, slots: [[27, 20, -2]] },
-  2: { w: 40, slots: [[6, 4, -4], [52, 44, 3.5]] },
-  3: { w: 36, slots: [[4, 2, -4], [54, 12, 3], [27, 52, -2]] },
-  4: { w: 33, slots: [[4, 0, -3], [58, 6, 4], [2, 50, -4], [56, 56, 3]] },
-  5: { w: 31, slots: [[22, 0, -3], [60, 8, 4], [36, 31, -2], [3, 38, -4], [58, 56, 3]] },
-  6: { w: 30, slots: [[22, 0, -3], [58, 9, 4], [40, 32, -2], [3, 38, -4], [69, 49, 4], [28, 64, -3]] },
-};
 
 /* ---------- Easy settings ----------
    HEADER_HEIGHT = height of your sticky header once you have scrolled. On laptops and desktops
@@ -66,7 +53,7 @@ const pad2 = (num) => String(num).padStart(2, '0');
 
 /* Little hand-drawn extras around the photos (decoration only) */
 function Doodles() {
-  const base = { position: 'absolute', pointerEvents: 'none', color: '#111', overflow: 'visible' };
+  const base = { position: 'absolute', pointerEvents: 'none', color: '#3368A0', overflow: 'visible' };
   const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
   return (
     <>
@@ -89,15 +76,39 @@ function Doodles() {
 
 export default function AlumniSection({ id = 'alumni' }) {
   const n = ALUMNI.length;
-  const [active, setActive] = useState(0);
-
-  if (n === 0) return null;
+  const [active, setActive] = useState(Math.floor(ALUMNI.length / 2));
+  const carouselRef = useRef(null);
+  const scrollTimerRef = useRef(null);
 
   const go = (i) => setActive(Math.max(0, Math.min(n - 1, i)));
 
-  const page = Math.floor(active / PER_PAGE);
-  const items = ALUMNI.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
-  const layout = LAYOUTS[items.length];
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    const card = carousel?.querySelector(`[data-al-index="${active}"]`);
+    if (!carousel || !card) return undefined;
+
+    const centerCard = () => {
+      const carouselCenter = carousel.getBoundingClientRect().left + carousel.clientWidth / 2;
+      const cardCenter = card.getBoundingClientRect().left + card.clientWidth / 2;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      carousel.scrollTo({
+        left: carousel.scrollLeft + cardCenter - carouselCenter,
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
+    };
+
+    const frame = requestAnimationFrame(centerCard);
+    window.addEventListener('resize', centerCard);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', centerCard);
+    };
+  }, [active]);
+
+  useEffect(() => () => clearTimeout(scrollTimerRef.current), []);
+
+  if (n === 0) return null;
+
   const current = ALUMNI[active];
 
   return (
@@ -105,129 +116,111 @@ export default function AlumniSection({ id = 'alumni' }) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,500&display=swap');
 
-        /* ---------- Phones and tablets: stacked ---------- */
         .dy-al {
           scroll-margin-top: var(--hh);
-          color: #0A0A0A;
-          background-color: #fff;
-          background-image: radial-gradient(rgba(0,0,0,.16) 1px, transparent 1.3px);
-          background-size: 22px 22px;
-          --cb: min(88vw, 420px);
-          --mh: var(--cb);
+          color: #172738;
+          background: transparent;
+        }
+        .dy-al-wrap {
+          padding: clamp(22px, 4vw, 48px);
         }
 
-        .dy-al-grid    { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 22px; max-width: 440px; margin: 0 auto; }
-        .dy-al-left    { display: contents; }
+        .dy-al-grid    { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 22px; max-width: 1100px; margin: 0 auto; }
+        .dy-al-left    { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
         .dy-al-title   { order: 1; margin: 0; line-height: .92; font-weight: 400; }
-        .dy-al-our     { display: block; font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.01em; font-size: clamp(46px, 15vw, 64px); }
-        .dy-al-big     { display: block; font-weight: 800; text-transform: uppercase; letter-spacing: -.03em; font-size: clamp(44px, 16vw, 68px); }
-        .dy-al-intro   { order: 2; margin: 0; max-width: 30ch; font-size: 15px; line-height: 1.5; color: #222; }
+        .dy-al-our     { display: block; color: #3368A0; font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.01em; font-size: clamp(46px, 15vw, 64px); }
+        .dy-al-big     { display: block; color: #172738; font-weight: 800; text-transform: uppercase; letter-spacing: -.03em; font-size: clamp(44px, 16vw, 68px); }
+        .dy-al-intro   { order: 2; margin: 0; max-width: 30ch; font-size: 15px; line-height: 1.5; color: #475569; }
 
-        .dy-al-cluster { order: 3; position: relative; width: var(--cb); height: var(--cb); margin: 4px auto 0; }
-        .dy-al-page    { position: absolute; inset: 0; animation: dyAlPage .5s cubic-bezier(.22,.8,.3,1) both; }
+        .dy-al-cluster { order: 3; position: relative; width: 100%; margin: 4px auto 0; }
+        .dy-al-carousel {
+          --card-width: clamp(112px, 14vw, 168px);
+          width: 100%;
+          overflow-x: auto;
+          padding: 20px 4px;
+          overscroll-behavior-x: contain;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+        }
+        .dy-al-carousel::-webkit-scrollbar { display: none; }
+        .dy-al-track { display: flex; width: max-content; min-width: 100%; align-items: center; justify-content: center; gap: clamp(12px, 2vw, 22px); }
+        @media (max-width: 640px) {
+          .dy-al-carousel { padding-inline: max(0px, calc((100% - var(--card-width)) / 2)); }
+        }
 
         .dy-al-card {
-          position: absolute; aspect-ratio: .86; padding: 0; border: 0; background: #fff; cursor: pointer;
+          position: relative; flex: 0 0 var(--card-width); width: var(--card-width); aspect-ratio: .86; padding: 0; border: 1px solid rgba(51,104,160,.16); border-radius: 18px; background: #fff; cursor: pointer;
           transform: rotate(var(--rot));
-          transition: transform .35s cubic-bezier(.22,.8,.3,1), box-shadow .35s ease;
-          box-shadow: 0 10px 24px rgba(0,0,0,.2), 0 2px 5px rgba(0,0,0,.12);
+          transition: transform .35s cubic-bezier(.22,.8,.3,1), box-shadow .35s ease, opacity .35s ease;
+          box-shadow: 0 10px 24px rgba(23,39,56,.16), 0 2px 5px rgba(23,39,56,.08);
+          scroll-snap-align: center;
         }
-        .dy-al-card::after {   /* paper grain */
-          content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .09; mix-blend-mode: multiply;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
+        .dy-al-card::after { content: none; }
         .dy-al-card:hover { transform: translateY(-5px) rotate(var(--rot)); }
-        .dy-al-card[data-active="true"] { transform: rotate(0deg) scale(1.07); box-shadow: 0 22px 44px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.16); }
+        .dy-al-card[data-active="true"] { transform: rotate(0deg) scale(1.07); border-color: #F2A93B; box-shadow: 0 22px 44px rgba(23,39,56,.22), 0 4px 10px rgba(23,39,56,.12); }
         .dy-al-card:focus-visible { outline: 2px solid #000; outline-offset: 4px; }
 
-        .dy-al-frame   { position: absolute; inset: 6px; display: block; overflow: hidden; background: #d4d4d4; }
-        .dy-al-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; filter: grayscale(1) contrast(1.06); user-select: none; }
-        .dy-al-initials { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; background: linear-gradient(135deg, #3a3a3a, #8a8a8a);
-                          color: rgba(255,255,255,.7); font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(22px, calc(var(--cb) * .1), 44px); }
-        .dy-al-tag     { position: absolute; left: 0; top: 0; padding: 2px 6px; background: #fff; color: #000; font-size: clamp(8px, calc(var(--cb) * .02), 10px); font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+        .dy-al-frame   { position: absolute; inset: 5px; display: block; overflow: hidden; border-radius: 13px; background: #dbe7ec; }
+        .dy-al-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; user-select: none; }
+        .dy-al-initials { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; background: linear-gradient(135deg, #3368A0, #172738);
+                          color: #fff; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(22px, 8vw, 44px); }
+        .dy-al-tag     { position: absolute; left: 8px; top: 8px; padding: 3px 7px; border-radius: 6px; background: #172738; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
         .dy-al-cap     { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 8px 7px; text-align: left; color: #fff; text-transform: uppercase; font-weight: 700; letter-spacing: .06em;
-                         font-size: clamp(9px, calc(var(--cb) * .022), 12px); background: linear-gradient(to top, rgba(0,0,0,.75), transparent); opacity: 0; transition: opacity .25s ease; }
+                         font-size: 10px; background: linear-gradient(to top, rgba(20,37,56,.92), transparent); opacity: 0; transition: opacity .25s ease; }
         .dy-al-card:hover .dy-al-cap, .dy-al-card:focus-visible .dy-al-cap, .dy-al-card[data-active="true"] .dy-al-cap { opacity: 1; }
 
-        .dy-al-quote-block { order: 4; padding-top: 14px; border-top: 1px solid #0A0A0A; animation: dyAlIn .6s cubic-bezier(.22,.8,.3,1) both; }
-        .dy-al-who     { display: flex; align-items: center; gap: 10px; }
-        .dy-al-no      { padding: 2px 6px; background: #0A0A0A; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
-        .dy-al-name    { font-size: 15px; font-weight: 700; }
-        .dy-al-role    { margin: 4px 0 0; font-size: 13px; color: #555; }
-        .dy-al-quote   { margin: 12px 0 0; font-size: 19px; font-weight: 600; line-height: 1.35; letter-spacing: -.005em; }
+        .dy-al-quote-block { order: 4; width: min(100%, 760px); margin: 0 auto; padding: 8px 0; text-align: center; animation: dyAlIn .6s cubic-bezier(.22,.8,.3,1) both; }
+        .dy-al-quote-block::before { content: '“'; display: block; margin-bottom: 8px; color: #F2A93B; font-family: 'Playfair Display', Georgia, serif; font-size: 46px; line-height: .7; }
+        .dy-al-who     { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .dy-al-no      { padding: 3px 7px; border-radius: 6px; background: #3368A0; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+        .dy-al-name    { color: #172738; font-size: 15px; font-weight: 700; }
+        .dy-al-role    { margin: 4px 0 0; font-size: 13px; color: #64748B; }
+        .dy-al-quote   { margin: 12px 0 0; color: #172738; font-size: clamp(17px, 2vw, 22px); font-weight: 600; line-height: 1.45; letter-spacing: -.005em; }
 
-        .dy-al-foot    { order: 5; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px 16px; }
-        .dy-al-meet    { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-        .dy-al-dots    { grid-column: 1 / -1; grid-row: 2; display: flex; justify-content: center; gap: 8px; }
-        .dy-al-dot     { width: 9px; height: 9px; padding: 0; border: 1px solid #0A0A0A; border-radius: 50%; background: transparent; cursor: pointer; transition: transform .25s ease, background .25s ease; }
-        .dy-al-dot[aria-selected="true"] { background: #0A0A0A; transform: scale(1.3); }
+        .dy-al-foot    { order: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px 16px; }
+        .dy-al-meet    { color: #3368A0; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        .dy-al-dots    { display: flex; justify-content: center; gap: 8px; }
+        .dy-al-dot     { width: 9px; height: 9px; padding: 0; border: 1px solid #3368A0; border-radius: 50%; background: transparent; cursor: pointer; transition: transform .25s ease, background .25s ease; }
+        .dy-al-dot[aria-selected="true"] { border-color: #F2A93B; background: #F2A93B; transform: scale(1.3); }
         .dy-al-nav     { display: flex; gap: 10px; }
-        .dy-al-btn     { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: #f1f1f1; color: #0A0A0A; cursor: pointer;
+        .dy-al-btn     { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: #172738; color: #fff; cursor: pointer;
                          transition: background .2s ease, color .2s ease, opacity .2s ease; }
-        .dy-al-btn:hover:not(:disabled) { background: #0A0A0A; color: #fff; }
+        .dy-al-btn:hover:not(:disabled) { background: #3368A0; color: #fff; }
         .dy-al-btn:disabled { opacity: .35; cursor: default; }
 
         @keyframes dyAlIn   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-        @keyframes dyAlPage { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
         @media (prefers-reduced-motion: reduce) {
           .dy-al *, .dy-al *::before, .dy-al *::after { transition: none !important; animation: none !important; }
         }
 
-        /* ---------- Laptops and desktops: one screen, text on the left, photos on the right ---------- */
         @media (min-width: 1024px) {
           .dy-al {
             --pad: clamp(18px, 4vh, 48px);
             --sh: calc(100vh - var(--hh));
-            --foot: 44px;
-            --footgap: 14px;
-            --mh: clamp(300px, calc(var(--sh) - 2 * var(--pad) - var(--foot) - var(--footgap)), 540px);   /* height of the main area */
-            --cb: min(var(--mh), 46vw);                                                                  /* size of the photo cluster */
             min-height: var(--sh);
             display: flex;
             align-items: center;
             padding-top: var(--pad);
             padding-bottom: var(--pad);
           }
+          .dy-al-wrap { padding: clamp(28px, 4vw, 52px); }
           @supports (height: 100svh) {
             .dy-al { --sh: calc(100svh - var(--hh)); }
           }
 
-          /* The phone layout re-orders the pieces; on desktop they follow the natural order */
-          .dy-al-title, .dy-al-intro, .dy-al-cluster, .dy-al-quote-block, .dy-al-foot { order: 0; }
-
           .dy-al-grid {
             max-width: 1100px;
-            grid-template-columns: minmax(0, 1fr) var(--cb);
-            grid-template-rows: var(--mh) var(--foot);
-            column-gap: clamp(28px, 4vw, 64px);
-            row-gap: var(--footgap);
+            row-gap: 18px;
           }
 
-          /* The headline stays put; only the quote area below it changes from one alumnus to the next */
-          .dy-al-left    { display: flex; flex-direction: column; justify-content: flex-start; padding-top: calc(var(--mh) * .08); min-width: 0; min-height: 0; }
+          .dy-al-left    { gap: 14px; }
           .dy-al-title   { flex: none; }
-          .dy-al-our     { font-size: clamp(46px, min(calc(var(--mh) * .15), 6.8vw), 88px); }
-          .dy-al-big     { font-size: clamp(44px, min(calc(var(--mh) * .17), 7.6vw), 100px); }
-          .dy-al-intro   { flex: none; margin-top: calc(var(--mh) * .035); font-size: clamp(13px, calc(var(--mh) * .03), 16px); }
-
-          .dy-al-quote-block {
-            flex: 0 1 auto;
-            min-height: 0;
-            overflow: hidden;
-            margin-top: calc(var(--mh) * .05);
-            padding-bottom: 16px;   /* fade zone: a quote that fits is never faded */
-            -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
-            mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
-          }
-          .dy-al-name    { font-size: clamp(13px, calc(var(--mh) * .027), 16px); }
-          .dy-al-role    { font-size: clamp(11.5px, calc(var(--mh) * .022), 14px); }
-          .dy-al-quote   { font-size: clamp(15px, calc(var(--mh) * .038), 22px); }
-
-          .dy-al-cluster { width: var(--cb); height: var(--cb); margin: 0; align-self: center; justify-self: end; }
-
-          .dy-al-foot    { grid-column: 1 / -1; grid-template-columns: 1fr auto 1fr; }
-          .dy-al-dots    { grid-column: auto; grid-row: auto; }
+          .dy-al-our     { font-size: clamp(46px, 6.8vw, 88px); }
+          .dy-al-big     { font-size: clamp(44px, 7.6vw, 100px); }
+          .dy-al-intro   { font-size: 16px; }
+          .dy-al-cluster { margin-top: 0; }
+          .dy-al-foot    { margin-top: 2px; }
           .dy-al-nav     { justify-self: end; }
         }
       `}</style>
@@ -245,57 +238,75 @@ export default function AlumniSection({ id = 'alumni' }) {
       >
         <ScrollReveal animation="fade-up" delay={100} duration={700}>
           <div className="dy-al-grid">
-            {/* LEFT: headline, intro and the selected alumnus's quote */}
+            {/* Heading and introduction */}
             <div className="dy-al-left">
               <h2 className="dy-al-title">
                 <span className="dy-al-our">Our</span>
                 <span className="dy-al-big">Alumni</span>
               </h2>
               <p className="dy-al-intro">Entrepreneurs who travelled the Yatra, and the ideas they took home.</p>
+            </div>
 
-              <div key={active} className="dy-al-quote-block" aria-live="polite">
-                <div className="dy-al-who">
-                  <span className="dy-al-no">{pad2(active + 1)}</span>
-                  <span className="dy-al-name">{current.name}</span>
+            {/* Centered, horizontally scrollable alumni photos */}
+            <div className="dy-al-cluster">
+              <Doodles />
+              <div
+                ref={carouselRef}
+                className="dy-al-carousel"
+                onScroll={() => {
+                  clearTimeout(scrollTimerRef.current);
+                  scrollTimerRef.current = setTimeout(() => {
+                    const carousel = carouselRef.current;
+                    if (!carousel) return;
+                    const center = carousel.getBoundingClientRect().left + carousel.clientWidth / 2;
+                    const cards = [...carousel.querySelectorAll('[data-al-index]')];
+                    const nearest = cards.reduce((best, card) => {
+                      const index = Number(card.getAttribute('data-al-index'));
+                      const distance = Math.abs(card.getBoundingClientRect().left + card.clientWidth / 2 - center);
+                      return distance < best.distance ? { index, distance } : best;
+                    }, { index: active, distance: Infinity });
+                    go(nearest.index);
+                  }, 120);
+                }}
+              >
+                <div className="dy-al-track">
+                  {ALUMNI.map((alumnus, i) => {
+                    const photo = photoUrl(alumnus.photo);
+                    return (
+                      <button
+                        key={alumnus.name}
+                        type="button"
+                        className="dy-al-card"
+                        data-al-index={i}
+                        data-active={i === active}
+                        aria-pressed={i === active}
+                        aria-label={`${alumnus.name}, ${alumnus.role}`}
+                        onClick={() => go(i)}
+                        style={{ '--rot': `${[-4, 3, -2, 4, -3][i % 5]}deg` }}
+                      >
+                        <span className="dy-al-frame">
+                          {photo ? (
+                            <img src={photo} alt={alumnus.name} draggable={false} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                          ) : (
+                            <span className="dy-al-initials">{initials(alumnus.name)}</span>
+                          )}
+                          <span className="dy-al-tag">{pad2(i + 1)}</span>
+                          <span className="dy-al-cap">{alumnus.name}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <p className="dy-al-role">{current.role}</p>
-                <p className="dy-al-quote">&ldquo;{current.quote}&rdquo;</p>
               </div>
             </div>
 
-            {/* RIGHT: tilted photos (click one to read their quote) */}
-            <div className="dy-al-cluster">
-              <Doodles />
-              <div key={page} className="dy-al-page">
-                {items.map((a, k) => {
-                  const i = page * PER_PAGE + k;
-                  const [left, top, rot] = layout.slots[k];
-                  const isActive = i === active;
-                  const photo = photoUrl(a.photo);
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className="dy-al-card"
-                      data-active={isActive}
-                      aria-pressed={isActive}
-                      aria-label={`${a.name}, ${a.role}`}
-                      onClick={() => go(i)}
-                      style={{ left: `${left}%`, top: `${top}%`, width: `${layout.w}%`, '--rot': `${rot}deg`, zIndex: isActive ? 20 : 2 + k }}
-                    >
-                      <span className="dy-al-frame">
-                        {photo ? (
-                          <img src={photo} alt="" draggable={false} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        ) : (
-                          <span className="dy-al-initials">{initials(a.name)}</span>
-                        )}
-                        <span className="dy-al-tag">{pad2(i + 1)}</span>
-                        <span className="dy-al-cap">{a.name}</span>
-                      </span>
-                    </button>
-                  );
-                })}
+            <div key={active} className="dy-al-quote-block" aria-live="polite">
+              <div className="dy-al-who">
+                <span className="dy-al-no">{pad2(active + 1)}</span>
+                <span className="dy-al-name">{current.name}</span>
               </div>
+              <p className="dy-al-role">{current.role}</p>
+              <p className="dy-al-quote">&ldquo;{current.quote}&rdquo;</p>
             </div>
 
             {/* BOTTOM: label, dots and arrows */}

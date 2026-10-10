@@ -62,9 +62,15 @@ export default function Header({ onOpenApply }) {
     >
       <div className="w-full flex items-center justify-end">
 
+<<<<<<< HEAD
         {/* DESKTOP: NAV LINKS, BROCHURE LINK, MAIN BUTTON, ADMIN LOCK (all on the right) */}
         <div className="hidden lg:flex items-center gap-3 xl:gap-4 justify-end">
           <nav className="flex items-center gap-4 xl:gap-5">
+=======
+        {/* 2. RIGHT (desktop): NAV LINKS, BROCHURE LINK, MAIN BUTTON */}
+        <div className="hidden lg:flex items-center gap-5 xl:gap-7 justify-end">
+          <nav className="flex items-center gap-5 xl:gap-8">
+>>>>>>> ec1671624ebafb154da7009af5ef6fa31ea4bf71
             {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.id;
               return (

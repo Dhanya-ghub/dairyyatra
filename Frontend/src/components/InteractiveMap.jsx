@@ -4,6 +4,39 @@ import { FULL_ITINERARY } from '../data/yatraData';
 import ScrollReveal from './ScrollReveal';
 import * as ItineraryModule from './Itinerary';
 import { MAP_W, MAP_H, OUTLINE_D, BORDERS_D, ROUTE_STATES_D, project } from './indiaMapData';
+import day1Image from '../../dairy_yatra_15_day_images/day1.jpeg';
+import day2Image from '../../dairy_yatra_15_day_images/day2.jpeg';
+import day3Image from '../../dairy_yatra_15_day_images/day3.jpeg';
+import day4Image from '../../dairy_yatra_15_day_images/day4.jpeg';
+import day5Image from '../../dairy_yatra_15_day_images/day5.jpeg';
+import day6Image from '../../dairy_yatra_15_day_images/day6.jpeg';
+import day7Image from '../../dairy_yatra_15_day_images/day7.jpeg';
+import day8Image from '../../dairy_yatra_15_day_images/day8.jpeg';
+import day9Image from '../../dairy_yatra_15_day_images/day9.jpeg';
+import day10Image from '../../dairy_yatra_15_day_images/day10.jpeg';
+import day11Image from '../../dairy_yatra_15_day_images/day11.jpeg';
+import day12Image from '../../dairy_yatra_15_day_images/day12.jpeg';
+import day13Image from '../../dairy_yatra_15_day_images/day13.jpeg';
+import day14Image from '../../dairy_yatra_15_day_images/day14.jpeg';
+import day15Image from '../../dairy_yatra_15_day_images/day15.jpeg';
+
+const DAY_IMAGES = [
+  day1Image,
+  day2Image,
+  day3Image,
+  day4Image,
+  day5Image,
+  day6Image,
+  day7Image,
+  day8Image,
+  day9Image,
+  day10Image,
+  day11Image,
+  day12Image,
+  day13Image,
+  day14Image,
+  day15Image,
+];
 
 /* Your journey texts, card photos and timeline labels live in Itinerary.jsx (MASTERS_JOURNEY_DATA).
    Add the word `export` in front of  "const MASTERS_JOURNEY_DATA"  in that file so they can be used here. */
@@ -200,8 +233,8 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
       style={{ overflowX: 'clip' }}
     >
       <span id={altId} className="absolute top-0" aria-hidden="true" />
-      <div className="pointer-events-none absolute right-0 top-0 h-[550px] w-[550px] rounded-full bg-[#f2b134]/15 blur-[140px]" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-[550px] w-[550px] rounded-full bg-[#C8DFDB]/40 blur-[140px]" />
+      <div className="pointer-events-none absolute right-0 top-0 h-[550px] w-[550px] max-w-full rounded-full bg-[#f2b134]/15 blur-[140px]" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-[550px] w-[550px] max-w-full rounded-full bg-[#C8DFDB]/40 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl">
         <ScrollReveal animation="fade-down" duration={700}>
@@ -217,7 +250,7 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
         </ScrollReveal>
 
         {/* The track gives the page room to scroll while the journey stays pinned (large screens) */}
-        <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 28, 200)}vh` }}>
+        <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 12, 140)}vh` }}>
           <div className="lg:sticky lg:top-24">
             <div className="grid gap-5 lg:grid-cols-12 lg:items-center">
 
@@ -236,10 +269,10 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
                 <div className="relative z-10 grid items-center gap-6 md:grid-cols-1 xl:grid-cols-[190px_1fr] md:gap-8">
                   {/* Single day photo (no overlapping cards, no extra text) */}
                   <div className="flex items-center justify-center">
-                    {(m?.image || m?.cards?.[1]?.src) && (
+                    {DAY_IMAGES[item.day - 1] && (
                       <img
                         key={`img-${item.day}`}
-                        src={m.image || m.cards[1].src}
+                        src={DAY_IMAGES[item.day - 1]}
                         alt={m.title || item.institution}
                         loading="lazy"
                         className={`aspect-[4/5] w-[170px] rounded-2xl object-cover shadow-[0_14px_30px_rgba(0,0,0,0.45)] ring-1 ring-white/20 transition-all duration-500 sm:w-[190px] ${

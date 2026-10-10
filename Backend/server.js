@@ -140,7 +140,11 @@ function validateSubmission(d) {
     e.secondaryNo = 'Enter a valid 10-digit number or leave it empty';
 
   const email = str(d.email);
+<<<<<<< HEAD
   if (email && (!EMAIL.test(email) || email.length > 150)) e.email = 'Enter a valid email address or leave it empty';
+=======
+  if (email && (!EMAIL.test(email) || email.length > 150)) e.email = 'Enter a valid email address';
+>>>>>>> ec1671624ebafb154da7009af5ef6fa31ea4bf71
 
   const address = str(d.address);
   if (address.length < 10 || address.length > 500) e.address = 'Enter your residential address';
@@ -161,6 +165,11 @@ function validateSubmission(d) {
   if (learning.length < 30 || learning.length > 3000)
     e.learningExpectations = 'Please write at least 30 characters about your learning expectations';
 
+  if (!['Yes', 'No'].includes(d.wantsScholarship)) e.wantsScholarship = 'Select Yes or No';
+  const scholarshipReason = str(d.scholarshipReason);
+  if (d.wantsScholarship === 'Yes' && (!scholarshipReason || scholarshipReason.length > 3000))
+    e.scholarshipReason = 'Tell us why you are applying for a scholarship';
+
   return { isValid: Object.keys(e).length === 0, errors: e };
 }
 
@@ -177,12 +186,18 @@ function mapApplicationToDatabase(f) {
     gender: f.gender,
     whatsapp: digitsOnly(f.whatsapp),
     secondary_no: digitsOnly(f.secondaryNo) || null,
+<<<<<<< HEAD
     email: str(f.email).toLowerCase() || null, // optional: many applicants have no email
+=======
+    email: str(f.email).trim().toLowerCase() || null,
+>>>>>>> ec1671624ebafb154da7009af5ef6fa31ea4bf71
     address: str(f.address),
     city: str(f.city),
     state: str(f.state),
     occupation: str(f.occupation),
     organization: str(f.organization) || null,
+    wants_scholarship: f.wantsScholarship === 'Yes',
+    scholarship_reason: f.wantsScholarship === 'Yes' ? str(f.scholarshipReason).trim() : null,
     prior_experience: str(f.priorExperience),
     motivation: str(f.motivation),
     learning_expectations: str(f.learningExpectations),
@@ -211,6 +226,8 @@ function mapDatabaseToFrontend(row) {
       state: row.state,
       occupation: row.occupation,
       organization: row.organization,
+      wantsScholarship: row.wants_scholarship ? 'Yes' : 'No',
+      scholarshipReason: row.scholarship_reason,
       priorExperience: row.prior_experience,
       motivation: row.motivation,
       learningExpectations: row.learning_expectations,

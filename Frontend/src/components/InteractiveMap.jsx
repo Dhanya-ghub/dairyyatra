@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Train, Bus, Plane } from 'lucide-react';
 import { FULL_ITINERARY } from '../data/yatraData';
-import ScrollReveal from './ScrollReveal';
 import * as ItineraryModule from './Itinerary';
-import { MAP_W, MAP_H, OUTLINE_D, BORDERS_D, ROUTE_STATES_D, project } from './indiaMapData';
+import { MAP_W, MAP_H, OUTLINE_D, BORDERS_D, ROUTE_STATE_SHAPES } from './indiaMapData';
 import day1Image from '../../dairy_yatra_15_day_images/day1.jpeg';
 import day2Image from '../../dairy_yatra_15_day_images/day2.jpeg';
 import day3Image from '../../dairy_yatra_15_day_images/day3.jpeg';
@@ -38,149 +36,260 @@ const DAY_IMAGES = [
   day15Image,
 ];
 
+/* ------------------------------------------------------------ Media ----
+   Each day's full-screen background comes from DAY_MEDIA.
+   Right now every day uses its photo. To switch a day to a video later, import the
+   clip and replace that day's entry. Nothing else in this file needs to change:
+
+     import day1Video from '../../Bg videos/day1.mp4';
+     DAY_MEDIA[0] = { type: 'video', src: day1Video, poster: day1Image };
+
+   (poster = the still shown while the video loads) */
+const DAY_MEDIA = DAY_IMAGES.map((src) => ({ type: 'image', src }));
+
 /* Your journey texts, card photos and timeline labels live in Itinerary.jsx (MASTERS_JOURNEY_DATA).
    Add the word `export` in front of  "const MASTERS_JOURNEY_DATA"  in that file so they can be used here. */
 const MASTERS = ItineraryModule.MASTERS_JOURNEY_DATA || {};
 
-/* ------------------------------------------------------------ Map stops ---- */
-const STOPS = [
-  { name: 'Coimbatore', lon: 76.9558, lat: 11.0168 },
-  { name: 'Tiptur', lon: 76.4774, lat: 13.2569 },
-  { name: 'Kolhapur', lon: 74.2433, lat: 16.705 },
-  { name: 'Baramati', lon: 74.5815, lat: 18.1514 },
-  { name: 'Phaltan', lon: 74.4333, lat: 17.9833 },
-  { name: 'Shrirampur', lon: 74.6563, lat: 19.6153 },
-  { name: 'Anand', lon: 72.9289, lat: 22.5645 },
-  { name: 'Bikaner', lon: 73.3119, lat: 28.0229 },
-  { name: 'Jaipur', lon: 75.7873, lat: 26.9124 },
-];
-const POINTS = STOPS.map((s) => project(s.lon, s.lat));
-const ROUTE = [...POINTS, POINTS[0]]; // the last leg returns to Coimbatore
+/* ------------------------------------------------------------ Route: states, not places ----
+   The journey is shown state by state. Codes match ROUTE_STATE_SHAPES in indiaMapData.js:
+   TN Tamil Nadu, KA Karnataka, MH Maharashtra, GJ Gujarat, RJ Rajasthan, HR Haryana, PB Punjab, TG Telangana */
+const ROUTE_ORDER = ['TN', 'KA', 'MH', 'GJ', 'RJ', 'HR', 'PB', 'TG'];
+
+/* Which state each day (Day 1 ... Day 15) is in, as a position in ROUTE_ORDER above
+   (0 = Tamil Nadu, 1 = Karnataka, 2 = Maharashtra, 3 = Gujarat, 4 = Rajasthan, 5 = Haryana, 6 = Punjab, 7 = Telangana).
+   👉 Check this against the final itinerary and change the numbers if a day is in a different state. */
+const DAY_STATE = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7, 7, 0];
+
+const STATES = ROUTE_ORDER.map((code) => ROUTE_STATE_SHAPES[code]);
+const POINTS = STATES.map((st) => st.center);
+const ROUTE = [...POINTS, POINTS[0]]; // the last leg returns to Tamil Nadu
 const ROUTE_D = 'M' + ROUTE.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L');
-const CUM = ROUTE.reduce((acc, p, i) => {
-  acc.push(i === 0 ? 0 : acc[i - 1] + Math.hypot(p[0] - ROUTE[i - 1][0], p[1] - ROUTE[i - 1][1]));
+const CUM = ROUTE.reduce((acc, pt, i) => {
+  acc.push(i === 0 ? 0 : acc[i - 1] + Math.hypot(pt[0] - ROUTE[i - 1][0], pt[1] - ROUTE[i - 1][1]));
   return acc;
 }, []);
 const TOTAL_LEN = CUM[CUM.length - 1];
 
-/* Day 1..15 -> marker on the map, and how far along the route */
-const DAY_STOP = [0, 1, 1, 2, 2, 3, 4, 5, 6, 6, 6, 7, 7, 8, 0];
-const DAY_LEG = [0, 1, 1, 2, 2, 3, 4, 5, 6, 6, 6, 7, 7, 8, 9];
+/* How far along the route each day is (the last day completes the loop back home) */
+const DAY_LEG = DAY_STATE.map((st, d) => (d === DAY_STATE.length - 1 && st === 0 ? ROUTE_ORDER.length : st));
 
-/* One place that decides the mode of transport from the text in yatraData (case-insensitive).
-   Flight / air  -> plane,  Train / rail -> train,  everything else (bus, coach, road, local transit, cab) -> bus */
-const getTransportKind = (t = '') => {
-  const s = String(t).toLowerCase();
-  if (/flight|air|plane/.test(s)) return 'flight';
-  if (/train|rail/.test(s)) return 'train';
-  return 'bus';
-};
+/* ------------------------------------------------------------ Styles ---- */
+const STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+.jx-display { font-family: "Oswald", "Bebas Neue", "Arial Narrow", Impact, sans-serif; }
 
-const TRANSPORT_STYLE = {
-  flight: { Icon: Plane, text: 'text-sky-400', color: '#0284C7', ring: '#38BDF8', ping: 'bg-sky-400/40' },
-  train: { Icon: Train, text: 'text-emerald-400', color: '#059669', ring: '#34D399', ping: 'bg-emerald-400/40' },
-  bus: { Icon: Bus, text: 'text-amber-400', color: '#D97706', ring: '#FBBF24', ping: 'bg-amber-400/40' },
-};
+@keyframes jx-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes jx-kb   { from { transform: scale(1.08); } to { transform: scale(1); } }
+.jx-bg { animation: jx-fade .9s ease backwards, jx-kb 7s ease-out backwards; }
 
-/* Big icon for the moving marker on the timeline */
-const getTransportMarker = (t = '') => TRANSPORT_STYLE[getTransportKind(t)];
+@keyframes jx-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.jx-rise-1, .jx-rise-2, .jx-rise-3, .jx-rise-4 { animation: jx-rise .7s cubic-bezier(.16,1,.3,1) backwards; }
+.jx-rise-1 { animation-delay: .05s; }
+.jx-rise-2 { animation-delay: .14s; }
+.jx-rise-3 { animation-delay: .24s; }
+.jx-rise-4 { animation-delay: .32s; }
 
-/* ------------------------------------------------------------ Map ---- */
+@keyframes jx-pulse { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(3.2); opacity: 0; } }
+.jx-pulse { transform-box: fill-box; transform-origin: center; animation: jx-pulse 1.8s ease-out infinite; }
+.jx-progress { transition: stroke-dasharray .9s cubic-bezier(.4,0,.2,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .jx-bg { animation: jx-fade .3s ease backwards; }
+  .jx-rise-1, .jx-rise-2, .jx-rise-3, .jx-rise-4, .jx-pulse { animation: none; }
+}
+`;
+
+/* ------------------------------------------------------------ Media tile ----
+   Renders an image or a video from a DAY_MEDIA entry. Only an `active` video plays. */
+function StopMedia({ media, alt = '', active = false, eager = false, className = '' }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (active) {
+      const p = v.play();
+      if (p && p.catch) p.catch(() => {});
+    } else {
+      v.pause();
+    }
+  }, [active, media?.src]);
+
+  if (!media) return null;
+
+  if (media.type === 'video') {
+    // The fading-out layer just shows its poster / first frame
+    if (!active && media.poster) {
+      return <img src={media.poster} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" className={className} />;
+    }
+    return (
+      <video
+        ref={ref}
+        src={media.src}
+        poster={media.poster}
+        muted
+        loop
+        playsInline
+        autoPlay={active}
+        preload={active ? 'auto' : 'metadata'}
+        aria-label={alt || undefined}
+        className={className}
+      />
+    );
+  }
+
+  return <img src={media.src} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" className={className} />;
+}
+
+/* ------------------------------------------------------------ Map ----
+   A fixed (non-moving) map of India. Only the route progress and the active marker change.
+   It is see-through so the background shows behind it. */
 function RouteMap({ idx, onPick }) {
-  const stop = DAY_STOP[idx] ?? 0;
+  const stateIdx = DAY_STATE[idx] ?? 0;
   const leg = DAY_LEG[idx] ?? 0;
   const frac = CUM[leg] / TOTAL_LEN;
-  const [cx, cy] = POINTS[stop];
-  const label = `${STOPS[stop].name} (Day ${idx + 1})`;
-  const lw = label.length * 6.1 + 18;
-  const left = cx + 14 + lw > MAP_W - 4;
+  const [cx, cy] = POINTS[stateIdx];
+
+  // state name next to the current state (no place, no day)
+  const label = STATES[stateIdx].name;
+  const fs = 12;
+  const lh = 24;
+  const lw = label.length * 6.8 + 22;
+  const gap = 12;
+  const left = cx + gap + lw > MAP_W - 4;
 
   return (
     <svg
       viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-      className="h-full w-full overflow-visible"
+      className="h-full w-full"
+      style={{ overflow: 'visible' }}
       role="img"
-      aria-label="Map of the Dairy Yatra route across India"
+      aria-label={`Map of the Dairy Yatra route across India. Now in ${label}.`}
     >
-      <style>{`
-        @keyframes jx-pulse { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(3.2); opacity: 0; } }
-        .jx-pulse { transform-box: fill-box; transform-origin: center; animation: jx-pulse 1.8s ease-out infinite; }
-        .jx-progress { transition: stroke-dasharray .9s cubic-bezier(.4,0,.2,1); }
-      `}</style>
+      <g style={{ pointerEvents: 'auto' }}>
+        {/* Country: a translucent glass fill so the background shows through */}
+        <path d={OUTLINE_D} fill="rgba(244,239,230,0.10)" stroke="none" style={{ filter: 'drop-shadow(0 10px 22px rgba(0,0,0,0.35))' }} />
+        <path d={BORDERS_D} fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.32)" strokeWidth="0.6" strokeLinejoin="round" />
 
-      {/* Background shadow: a solid copy of the country sits underneath and casts the shadow */}
-      <path
-        d={OUTLINE_D}
-        fill="#F4EFE6"
-        stroke="none"
-        style={{ filter: 'drop-shadow(0 14px 18px rgba(23,39,56,0.32)) drop-shadow(0 3px 5px rgba(23,39,56,0.18))' }}
-      />
+        {/* The route states: upcoming = faint gold, visited = gold, current = bright gold */}
+        {STATES.map((st, i) => {
+          const current = i === stateIdx;
+          const visited = i <= leg;
+          return (
+            <path
+              key={ROUTE_ORDER[i]}
+              d={st.d}
+              fill={current ? 'rgba(245,165,36,0.62)' : visited ? 'rgba(245,165,36,0.34)' : 'rgba(245,165,36,0.12)'}
+              stroke={current ? '#F5A524' : 'rgba(245,165,36,0.45)'}
+              strokeWidth={current ? 1.6 : 0.8}
+              strokeLinejoin="round"
+              style={{
+                cursor: 'pointer',
+                transition: 'fill .6s ease, stroke .6s ease, stroke-width .6s ease',
+                filter: current ? 'drop-shadow(0 0 8px rgba(245,165,36,0.6))' : 'none',
+              }}
+              onClick={() => onPick(DAY_STATE.indexOf(i))}
+            >
+              <title>{st.name}</title>
+            </path>
+          );
+        })}
 
-      <path d={BORDERS_D} fill="rgba(23,39,56,0.05)" stroke="rgba(23,39,56,0.3)" strokeWidth="0.6" strokeLinejoin="round" />
-      <path d={ROUTE_STATES_D} fill="rgba(245,158,11,0.17)" stroke="none" />
-      <path d={OUTLINE_D} fill="none" stroke="rgba(23,39,56,0.75)" strokeWidth="1.3" strokeLinejoin="round" />
+        <path d={OUTLINE_D} fill="none" stroke="rgba(255,248,235,0.9)" strokeWidth="1.3" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.55))', pointerEvents: 'none' }} />
 
-      <path d={ROUTE_D} fill="none" stroke="rgba(23,39,56,0.45)" strokeWidth="1.4" strokeDasharray="3 5" strokeLinecap="round" />
-      <path
-        className="jx-progress"
-        d={ROUTE_D}
-        pathLength="1"
-        fill="none"
-        stroke="#E8920B"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray={`${frac} 1.01`}
-        style={{ filter: 'drop-shadow(0 0 3px rgba(232,146,11,0.55))' }}
-      />
+        {/* Traversal: dashed full route between the states + the gold part travelled so far */}
+        <g style={{ pointerEvents: 'none' }}>
+          <path d={ROUTE_D} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1.4" strokeDasharray="3 5" strokeLinecap="round" />
+          <path
+            className="jx-progress"
+            d={ROUTE_D}
+            pathLength="1"
+            fill="none"
+            stroke="#F5A524"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={`${frac} 1.01`}
+            style={{ filter: 'drop-shadow(0 0 3px rgba(245,165,36,0.75))' }}
+          />
 
-      {POINTS.map(([x, y], i) => {
-        const visited = i <= leg;
-        return (
-          <g key={STOPS[i].name} style={{ cursor: 'pointer' }} onClick={() => onPick(DAY_STOP.indexOf(i))}>
-            <circle cx={x} cy={y} r="11" fill="transparent" />
-            <circle cx={x} cy={y} r="4" fill={visited ? '#E8920B' : '#F4EFE6'} stroke={visited ? '#fff' : 'rgba(23,39,56,0.65)'} strokeWidth="1.4" />
+          {POINTS.map(([x, y], i) => (
+            <circle
+              key={ROUTE_ORDER[i]}
+              cx={x}
+              cy={y}
+              r="4"
+              fill={i <= leg ? '#F5A524' : 'rgba(255,255,255,0.85)'}
+              stroke={i <= leg ? '#fff' : 'rgba(23,39,56,0.8)'}
+              strokeWidth="1.4"
+            />
+          ))}
+
+          {/* Current state */}
+          <circle className="jx-pulse" cx={cx} cy={cy} r="6" fill="#F5A524" />
+          <circle cx={cx} cy={cy} r="6.5" fill="#F5A524" stroke="#fff" strokeWidth="1.6" style={{ filter: 'drop-shadow(0 0 5px rgba(245,165,36,0.95))' }} />
+          <g transform={`translate(${left ? cx - gap - lw : cx + gap} ${cy - lh / 2})`}>
+            <rect width={lw} height={lh} rx={7} fill="rgba(11,22,34,0.88)" stroke="rgba(245,165,36,0.9)" strokeWidth={1} />
+            <text x={lw / 2} y={lh / 2 + fs * 0.36} textAnchor="middle" fontSize={fs} fontWeight="600" fill="#FFF3D6" style={{ fontFamily: '"DM Sans", system-ui, sans-serif' }}>
+              {label}
+            </text>
           </g>
-        );
-      })}
-
-      <circle className="jx-pulse" cx={cx} cy={cy} r="6" fill="#F59E0B" />
-      <circle cx={cx} cy={cy} r="6.5" fill="#F59E0B" stroke="#fff" strokeWidth="1.6" style={{ filter: 'drop-shadow(0 0 6px rgba(245,158,11,0.9))' }} />
-      <g transform={`translate(${left ? cx - 14 - lw : cx + 14} ${cy - 12})`} style={{ transition: 'transform .5s ease' }}>
-        <rect width={lw} height="24" rx="7" fill="#172738" stroke="rgba(245,158,11,0.9)" strokeWidth="1" />
-        <text x={lw / 2} y="16" textAnchor="middle" fontSize="11.5" fontWeight="600" fill="#FFF3D6" style={{ fontFamily: '"DM Sans", system-ui, sans-serif' }}>
-          {label}
-        </text>
+        </g>
       </g>
     </svg>
   );
 }
 
-/* ------------------------------------------------------------ Section ---- */
+/* ------------------------------------------------------------ Section ----
+   One full-screen page: the day's photo fills the screen, the map sits on the left and
+   the day's title + text on the right. No heading above it. */
 export default function InteractiveMap({ id = 'interactive-map', altId = 'itinerary' }) {
   const total = FULL_ITINERARY.length;
   const [idx, setIdx] = useState(0);
-  const [dir, setDir] = useState('next');
-  const [fading, setFading] = useState(false);
+  const [prev, setPrev] = useState(null); // the day fading out underneath
+  const [inView, setInView] = useState(false);
 
   const idxRef = useRef(0);
   const trackRef = useRef(null);
-  const timelineRef = useRef(null);
+  const stageRef = useRef(null);
   const auto = useRef(false);
   const touchX = useRef(null);
 
   const item = FULL_ITINERARY[idx] || FULL_ITINERARY[0];
   const m = MASTERS[item.day];
-  const pct = Math.round(((idx + 1) / total) * 100);
 
   const goTo = useCallback((t) => {
     if (t === idxRef.current) return;
-    setDir(t > idxRef.current ? 'next' : 'prev');
-    setFading(true);
+    setPrev(idxRef.current);
     idxRef.current = t;
     setIdx(t);
-    setTimeout(() => setFading(false), 300);
   }, []);
+
+  // Only play the background video while the section is on screen
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || !('IntersectionObserver' in window)) {
+      setInView(true);
+      return undefined;
+    }
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Warm up the next / previous backgrounds so the change is instant
+  useEffect(() => {
+    [idx - 1, idx + 1].forEach((i) => {
+      const md = DAY_MEDIA[i];
+      if (!md) return;
+      const src = md.type === 'video' ? md.poster : md.src;
+      if (src) {
+        const img = new Image();
+        img.src = src;
+      }
+    });
+  }, [idx]);
 
   // Scrolling the page (on large screens) moves the journey forward while the section stays pinned
   useEffect(() => {
@@ -189,9 +298,9 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
       const rect = trackRef.current.getBoundingClientRect();
       const dist = rect.height - window.innerHeight;
       if (dist <= 0) return;
-      const progress = -rect.top;
-      if (progress >= 0 && progress <= dist) {
-        goTo(Math.min(Math.floor((progress / dist) * total), total - 1));
+      const p = -rect.top;
+      if (p >= 0 && p <= dist) {
+        goTo(Math.min(Math.floor((p / dist) * total), total - 1));
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -214,156 +323,94 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
         auto.current = true;
         const top = (window.scrollY || document.documentElement.scrollTop) + rect.top + (t / Math.max(total - 1, 1)) * dist + 10;
         window.scrollTo({ top, behavior: 'smooth' });
-        setTimeout(() => { auto.current = false; }, 700);
+        setTimeout(() => {
+          auto.current = false;
+        }, 900);
       }
     },
     [goTo, total]
   );
 
-  // keep the active day visible in the timeline
-  useEffect(() => {
-    const node = timelineRef.current?.children[idx];
-    if (node) node.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }, [idx]);
+  const onTouchStart = (e) => {
+    touchX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e) => {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    touchX.current = null;
+    if (Math.abs(dx) > 60) {
+      if (dx < 0) scrollToDay(idx + 1);
+      else scrollToDay(idx - 1);
+    }
+  };
 
   return (
-    <section
-      id={id}
-      className="relative bg-[#F4EFE6] px-4 py-16 font-sans text-[#172738] sm:px-6 md:py-24"
-      style={{ overflowX: 'clip' }}
-    >
+    <section id={id} className="relative bg-[#0B1622] font-sans text-white" style={{ overflowX: 'clip' }}>
+      <style>{STYLES}</style>
       <span id={altId} className="absolute top-0" aria-hidden="true" />
-      <div className="pointer-events-none absolute right-0 top-0 h-[550px] w-[550px] max-w-full rounded-full bg-[#f2b134]/15 blur-[140px]" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-[550px] w-[550px] max-w-full rounded-full bg-[#C8DFDB]/40 blur-[140px]" />
 
-      <div className="relative z-10 mx-auto max-w-7xl">
-        <ScrollReveal animation="fade-down" duration={700}>
-          <div className="mx-auto mb-10 max-w-3xl text-center">
-            <h2 className="mb-4 font-serif text-3xl font-bold tracking-tight text-[#172738] sm:text-4xl md:text-5xl">
-              Traversing 5 States Across India
-            </h2>
-            <p className="text-base text-[#4E657D] sm:text-lg">
-              Explore the 15-day corridor step by step, from Tamil Nadu through Karnataka, Maharashtra, Gujarat and Rajasthan.
-              Scroll, tap a stop on the map, or pick a day on the timeline.
-            </p>
+      {/* The track gives the page room to scroll while the journey stays pinned (large screens) */}
+      <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 22, 160)}vh` }}>
+        <div
+          ref={stageRef}
+          className="relative isolate min-h-[100svh] overflow-hidden bg-[#0B1622] text-white lg:sticky lg:top-0 lg:h-[100svh]"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          {/* 1. Full-screen background for the day (image now, video later) */}
+          <div className="absolute inset-0" style={{ zIndex: 0 }} aria-hidden="true">
+            {prev !== null && prev !== idx && (
+              <div key={`bg-${prev}`} className="jx-bg absolute inset-0">
+                <StopMedia media={DAY_MEDIA[prev]} className="h-full w-full object-cover" />
+              </div>
+            )}
+            <div key={`bg-${idx}`} className="jx-bg absolute inset-0">
+              <StopMedia media={DAY_MEDIA[idx]} active={inView} eager className="h-full w-full object-cover" />
+            </div>
           </div>
-        </ScrollReveal>
 
-        {/* The track gives the page room to scroll while the journey stays pinned (large screens) */}
-        <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 12, 140)}vh` }}>
-          <div className="lg:sticky lg:top-24">
-            <div className="grid gap-5 lg:grid-cols-12 lg:items-center">
+          {/* 2. Shading so the map and text stay readable on any footage */}
+          <div className="pointer-events-none absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true">
+            <div className="absolute inset-0 bg-[#0B1622]/30" />
+            <div className="absolute inset-0 bg-gradient-to-l from-[#0B1622]/85 via-[#0B1622]/35 to-transparent" />
+            <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0B1622]/60 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0B1622]/75 to-transparent" />
+          </div>
 
-              {/* Map: sits on the page with a soft shadow underneath.
-                  Height is capped to the viewport so it never runs off the bottom at any zoom level. */}
-              <div className="relative flex items-center justify-center lg:col-span-7">
-                <div className="mx-auto max-w-[780px]" style={{ aspectRatio: `${MAP_W} / ${MAP_H}`, width: `min(100%, calc((100vh - 130px) * ${MAP_W / MAP_H}))` }}>
-                  <RouteMap idx={idx} onPick={(i) => scrollToDay(Math.max(i, 0))} />
-                </div>
+          {/* 3. Map (left) + content (right). Top padding leaves room for the fixed header. */}
+          <div
+            className="relative mx-auto grid min-h-[100svh] max-w-[1440px] grid-cols-1 content-center gap-8 px-4 pb-10 pt-24 sm:px-8 lg:h-full lg:min-h-0 lg:grid-cols-12 lg:items-center lg:gap-6 lg:px-12 lg:pb-12 lg:pt-28"
+            style={{ zIndex: 3 }}
+          >
+            {/* Map */}
+            <div className="order-2 flex items-center justify-center lg:order-1 lg:col-span-7 lg:h-full">
+              <div
+                className="mx-auto max-w-[560px] lg:max-w-[760px]"
+                style={{ aspectRatio: `${MAP_W} / ${MAP_H}`, width: `min(100%, calc((100svh - 170px) * ${MAP_W / MAP_H}))` }}
+              >
+                <RouteMap idx={idx} onPick={(i) => scrollToDay(Math.max(i, 0))} />
+              </div>
+            </div>
+
+            {/* Content: plain text on the background, no box */}
+            <div className="order-1 flex min-w-0 flex-col lg:order-2 lg:col-span-5">
+              <div key={`txt-${item.day}`}>
+                <h3 className="jx-rise-2 jx-display mb-5 line-clamp-3 text-[clamp(2.2rem,4vw,4.1rem)] font-semibold uppercase leading-[0.98] tracking-tight text-white [text-shadow:0_4px_24px_rgba(0,0,0,0.45)]">
+                  {m?.title || item.institution}
+                </h3>
+
+                <p className="jx-rise-3 line-clamp-5 max-w-lg text-[15px] font-light leading-relaxed text-white/85 lg:text-[17px]">
+                  {m?.headlineCopy || item.objective}
+                </p>
               </div>
 
-              {/* Journey panel */}
-              <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#142538] p-5 shadow-[0_24px_50px_rgba(23,39,56,0.28)] sm:p-8 lg:col-span-5" onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }} onTouchEnd={(e) => { if (touchX.current === null) return; const dx = e.changedTouches[0].clientX - touchX.current; touchX.current = null; if (Math.abs(dx) > 60) scrollToDay(idx + (dx < 0 ? 1 : -1)); }}>
-                <div className="pointer-events-none absolute right-0 top-0 h-[360px] w-[360px] rounded-full bg-[#66A3BF]/15 blur-[90px]" />
-
-                <div className="relative z-10 grid items-center gap-6 md:grid-cols-1 xl:grid-cols-[190px_1fr] md:gap-8">
-                  {/* Single day photo (no overlapping cards, no extra text) */}
-                  <div className="flex items-center justify-center">
-                    {DAY_IMAGES[item.day - 1] && (
-                      <img
-                        key={`img-${item.day}`}
-                        src={DAY_IMAGES[item.day - 1]}
-                        alt={m.title || item.institution}
-                        loading="lazy"
-                        className={`aspect-[4/5] w-[170px] rounded-2xl object-cover shadow-[0_14px_30px_rgba(0,0,0,0.45)] ring-1 ring-white/20 transition-all duration-500 sm:w-[190px] ${
-                          fading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
-                        }`}
-                      />
-                    )}
-                  </div>
-
-                  {/* Text: day, title and description only */}
-                  <div className="overflow-hidden text-center md:text-left">
-                    <div
-                      key={`txt-${item.day}`}
-                      className={`transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                        fading ? (dir === 'next' ? '-translate-x-6 opacity-0' : 'translate-x-6 opacity-0') : 'translate-x-0 opacity-100'
-                      }`}
-                    >
-                      <div className="mb-2 text-[12px] font-bold text-[#C8DFDB]">
-                        Day {item.day}
-                      </div>
-
-                      <h3 className="mb-2 font-sans text-xl font-bold tracking-tight text-white sm:text-2xl">
-                        {m?.title || item.institution}
-                      </h3>
-                      <p className="text-[13px] font-light leading-relaxed text-[#F2EFE7]/85 sm:text-sm">
-                        {m?.headlineCopy || item.objective}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Controls + timeline */}
-                <div className="relative z-10 mt-6 border-t border-white/15 pt-5">
-                  <div className="mb-3 flex items-center justify-end text-xs text-white/60">
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#C8DFDB]">{pct}% Journey Traversed</span>
-                  </div>
-
-                  <div className="relative pb-2 pt-4">
-                    <div className="relative h-1 overflow-hidden rounded-full bg-white/20">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#66A3BF] via-[#C8DFDB] to-[#3368A0] shadow-[0_0_10px_rgba(102,163,191,0.8)] transition-all duration-500"
-                        style={{ width: `${(idx / Math.max(total - 1, 1)) * 100}%` }}
-                      />
-                    </div>
-
-                    <div ref={timelineRef} className="no-scrollbar relative -mt-4 flex items-center justify-between overflow-x-auto py-2">
-                      {FULL_ITINERARY.map((d, i) => {
-                        const active = i === idx;
-                        const done = i <= idx;
-                        const node = MASTERS[d.day] || {};
-                        const { Icon, color, ring, ping } = getTransportMarker(d.transport);
-                        return (
-                          <button
-                            key={d.day}
-                            type="button"
-                            onClick={() => scrollToDay(i)}
-                            title={`Day ${d.day}: ${node.title || d.institution}`}
-                            className="group flex shrink-0 cursor-pointer flex-col items-center px-2 py-1 transition-all focus:outline-none sm:px-3"
-                          >
-                            <div className="relative flex items-center justify-center">
-                              {active ? (
-                                <div className="relative flex items-center justify-center">
-                                  <span className={`pointer-events-none absolute h-9 w-9 animate-ping rounded-full sm:h-10 sm:w-10 ${ping}`} />
-                                  {/* Marker follows the day's mode of transport: train, flight or bus */}
-                                  <div
-                                    className="z-10 flex h-8 w-8 scale-110 items-center justify-center rounded-full bg-white shadow-xl ring-2 sm:h-9 sm:w-9"
-                                    style={{ '--tw-ring-color': ring }}
-                                  >
-                                    <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" style={{ color }} strokeWidth={2.2} />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className={`rounded-full transition-all duration-300 ${done ? 'h-3 w-3 bg-[#66A3BF] hover:scale-125' : 'h-2.5 w-2.5 bg-white/40 hover:bg-white group-hover:scale-125'}`} />
-                              )}
-                            </div>
-                            <div className="mt-2 text-center">
-                              <span className={`block text-[11px] font-bold transition-colors sm:text-xs ${active ? 'font-extrabold text-white underline decoration-[#66A3BF] decoration-2 underline-offset-4' : done ? 'text-white/80' : 'text-white/40 group-hover:text-white/70'}`}>
-                                {node.timelineLabel || `Day ${d.day}`}
-                              </span>
-                              <span className={`block text-[9px] transition-colors sm:text-[10px] ${active ? 'font-medium text-[#C8DFDB]' : 'hidden text-white/30 md:block'}`}>
-                                {node.subLabel || d.location}
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+              {/* Simple gold tracker: as wide as the text, fills up as the journey moves on (no numbers or text) */}
+              <div className="mt-8 h-[3px] w-full max-w-lg overflow-hidden rounded-full bg-white/20" aria-hidden="true">
+                <div
+                  className="h-full rounded-full bg-[#F5A524] transition-[width] duration-700 ease-out"
+                  style={{ width: `${((idx + 1) / total) * 100}%`, boxShadow: '0 0 10px rgba(245,165,36,0.6)' }}
+                />
               </div>
-
             </div>
           </div>
         </div>

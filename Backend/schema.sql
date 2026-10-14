@@ -42,9 +42,9 @@ create table eoi_applications (
   -- Step 2: Dairy Experience
   wants_scholarship boolean not null default false,
   scholarship_reason text,
-  prior_experience      text not null,
-  motivation            text not null,
-  learning_expectations text not null,
+  prior_experience      text,
+  motivation            text,
+  learning_expectations text,
 
   -- Admin use
   admin_notes   text,

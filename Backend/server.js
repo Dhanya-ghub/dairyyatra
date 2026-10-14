@@ -150,16 +150,10 @@ function validateSubmission(d) {
   if (!str(d.occupation) || str(d.occupation).length > 100) e.occupation = 'Occupation is required';
   if (str(d.organization).length > 150) e.organization = 'Organization name is too long';
 
-  const prior = str(d.priorExperience);
-  if (prior.length < 3 || prior.length > 3000) e.priorExperience = 'Required (write "None" if you have no experience)';
-
-  const motivation = str(d.motivation);
-  if (motivation.length < 30 || motivation.length > 3000)
-    e.motivation = 'Please write at least 30 characters about your motivation';
-
-  const learning = str(d.learningExpectations);
-  if (learning.length < 30 || learning.length > 3000)
-    e.learningExpectations = 'Please write at least 30 characters about your learning expectations';
+  // Optional: these three may be empty. Only the maximum length is checked.
+  if (str(d.priorExperience).length > 3000) e.priorExperience = 'Please keep this under 3000 characters';
+  if (str(d.motivation).length > 3000) e.motivation = 'Please keep this under 3000 characters';
+  if (str(d.learningExpectations).length > 3000) e.learningExpectations = 'Please keep this under 3000 characters';
 
   if (!['Yes', 'No'].includes(d.wantsScholarship)) e.wantsScholarship = 'Select Yes or No';
   const scholarshipReason = str(d.scholarshipReason);
@@ -190,9 +184,10 @@ function mapApplicationToDatabase(f) {
     organization: str(f.organization) || null,
     wants_scholarship: f.wantsScholarship === 'Yes',
     scholarship_reason: f.wantsScholarship === 'Yes' ? str(f.scholarshipReason).trim() : null,
-    prior_experience: str(f.priorExperience),
-    motivation: str(f.motivation),
-    learning_expectations: str(f.learningExpectations),
+    // optional answers: saved as null when left empty
+    prior_experience: str(f.priorExperience) || null,
+    motivation: str(f.motivation) || null,
+    learning_expectations: str(f.learningExpectations) || null,
   };
 }
 

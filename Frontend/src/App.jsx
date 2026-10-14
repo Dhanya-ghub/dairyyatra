@@ -3,10 +3,9 @@ import CinematicPreloader from './components/CinematicPreloader';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Overview from './components/Overview';
-import AlumniSection from './components/Alumnisection';
 import InteractiveMap from './components/InteractiveMap';
 import HostOrganizations from './components/HostOrganizations';
-import ApplicationTimeline from './components/ApplicationTimeline';  
+import ApplicationTimeline from './components/ApplicationTimeline';
 import ApplicationModal from './components/ApplicationModal';
 import Footer from './components/Footer';
 import ScrollProgress from './components/ScrollProgress';
@@ -49,14 +48,13 @@ export default function App() {
       <main>
         <Hero onOpenApply={() => setIsApplyModalOpen(true)} />
         <Overview onOpenApply={() => setIsApplyModalOpen(true)} />
-        
         <InteractiveMap />
-        <AlumniSection />
+        {/* Host Organizations now comes before Alumni */}
         <HostOrganizations />
         <ApplicationTimeline onOpenApply={() => setIsApplyModalOpen(true)} />
       </main>
       <Footer onOpenApply={() => setIsApplyModalOpen(true)} />
-      
+
       {/* Floating Back to Top with circular scroll gauge */}
       <BackToTop />
 

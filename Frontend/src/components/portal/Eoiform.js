@@ -74,12 +74,7 @@ export function validateEoiStep(step, d) {
     if (!['Yes', 'No'].includes(d.wantsScholarship)) e.wantsScholarship = 'Select Yes or No';
     if (d.wantsScholarship === 'Yes' && !d.scholarshipReason?.trim())
       e.scholarshipReason = 'Tell us why you are applying for a scholarship';
-    if (!d.priorExperience || d.priorExperience.trim().length < 3)
-      e.priorExperience = 'Required (write "None" if you have no experience)';
-    if (!d.motivation || d.motivation.trim().length < 30)
-      e.motivation = 'Please write at least 30 characters about your motivation';
-    if (!d.learningExpectations || d.learningExpectations.trim().length < 30)
-      e.learningExpectations = 'Please write at least 30 characters about your learning expectations';
+    // priorExperience, motivation and learningExpectations are optional: no checks.
   }
 
   return { isValid: Object.keys(e).length === 0, errors: e };

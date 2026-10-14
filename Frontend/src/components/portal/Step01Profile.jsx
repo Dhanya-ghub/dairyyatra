@@ -36,10 +36,9 @@ export default function Step1Profile({ formData, setFormData, errors = {} }) {
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="border-b border-[#C8DFDB] pb-5">
-        <span className="text-xs uppercase tracking-widest font-bold text-[#3368A0] block mb-1">Step 01 of 02</span>
-        <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#172738] tracking-tight">Your Profile</h2>
+        <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#172738] tracking-tight">Join the Journey</h2>
         <p className="text-sm text-[#4E657D] mt-1.5 leading-relaxed">
-          Please enter your details exactly as they appear on your official documents.
+          Every great journey begins with a name. Tell us yours.
         </p>
       </div>
 

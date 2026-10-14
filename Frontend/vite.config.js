@@ -5,6 +5,8 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Vite only recognises lowercase image extensions; camera files come as .JPG
+  assetsInclude: ['**/*.JPG', '**/*.JPEG', '**/*.PNG', '**/*.WEBP'],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -1,26 +1,25 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 
+/* These three questions are optional: no asterisk, and no minimum length. */
 const QUESTIONS = [
   {
     key: 'priorExperience',
     rows: 4,
     label: 'Do you have any prior learning or experience in the dairy sector?',
-    hint: 'Describe it briefly, or write "None" if you have no prior experience.',
-    placeholder: 'e.g. Family dairy farm for 6 years, diploma in dairy technology, or None',
+    hint: 'Optional. Describe it briefly if you have any.',
+    placeholder: 'e.g. Family dairy farm for 6 years, diploma in dairy technology',
   },
   {
     key: 'motivation',
     rows: 5,
     label: 'What motivates you to join Dairy Yatra 2027?',
-    hint: 'Minimum 30 characters.',
     placeholder: 'Tell us what draws you to this journey...',
   },
   {
     key: 'learningExpectations',
     rows: 4,
     label: 'What are your key learning expectations?',
-    hint: 'Minimum 30 characters.',
     placeholder: 'What do you hope to learn and take back from the Yatra?',
   },
 ];
@@ -44,10 +43,9 @@ export default function Step2DairyExperience({ formData, setFormData, setErrors,
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="border-b border-[#C8DFDB] pb-5">
-        <span className="text-xs uppercase tracking-widest font-bold text-[#3368A0] block mb-1">Step 02 of 02</span>
-        <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#172738] tracking-tight">Your Dairy Experience</h2>
+        <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#172738] tracking-tight">Tell Us Your Story</h2>
         <p className="text-sm text-[#4E657D] mt-1.5 leading-relaxed">
-          Honest, specific answers help the selection committee understand your application.
+          Share what draws you to dairy.
         </p>
       </div>
 
@@ -114,7 +112,7 @@ export default function Step2DairyExperience({ formData, setFormData, setErrors,
           <div key={q.key}>
             <div className="flex items-start justify-between gap-3 mb-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#3368A0]">
-                {q.label} <span>*</span>
+                {q.label} <span className="normal-case font-semibold tracking-normal text-[#4E657D]">(optional)</span>
               </label>
               <span className="text-xs text-[#4E657D] whitespace-nowrap">{value.length} chars</span>
             </div>

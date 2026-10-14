@@ -1,160 +1,311 @@
-import React from 'react';
-import ScrollReveal from './ScrollReveal';
+import React, { useEffect, useRef, useState } from 'react';
+import { Sprout, Handshake, FlaskConical, Tractor } from 'lucide-react';
 
-/* Photos come from src/assets/images/ - files named 1, 2, 3 ... (extension in lower-case: .jpg .png .webp) */
-const modules = import.meta.glob('../assets/images/**/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default' });
-const BY_NUMBER = {};
-Object.entries(modules).forEach(([path, src]) => {
-  const name = path.split('/').pop();
-  if (/^\d+\./.test(name)) BY_NUMBER[parseInt(name, 10)] = src;
-});
+/* Colours: navy + off-white / cream only */
+const NAVY = '#14284B';
+const NAVY_LIGHT = '#3368A0';
+const PAPER = '#F4F2EE';
 
-/* The photo mosaic is a 14-column x 13-row grid (like the reference sketch).
-   n = photo file number (file "7.jpg" -> n: 7)
-   c = columns it covers, r = rows it covers  ("start / end", the end line is not included) */
-const PHOTOS = [
-  { n: 4, alt: 'Calves at a farm',                      c: '1 / 5',  r: '3 / 7'  },   // left, upper square
-  { n: 5, alt: 'Hands-on session at a dairy facility',  c: '1 / 5',  r: '7 / 11' },   // left, lower square
-  { n: 2, alt: 'Dairy expo hall',                       c: '5 / 9',  r: '1 / 5'  },   // top middle square
-  { n: 6, alt: 'Cattle shed',                           c: '9 / 12', r: '2 / 5'  },   // top right, small
-  { n: 1, alt: 'Farmer leading cattle through a grove', c: '5 / 11', r: '5 / 11', pos: '30% 50%' },   // big centre square
-  { n: 7, alt: 'Black buffalo in a shed',               c: '11 / 15', r: '5 / 14' },  // right, tall
-  { n: 3, alt: 'Cattle shed at sunrise',                c: '3 / 11', r: '11 / 14' },  // bottom, wide
-];
+// Logo in the centre of the Key Takeaways diagram (file lives in public/)
+const LOGO_URL = '/logo.png';
 
+/* Left side: the About text, exactly as given */
 const HIGHLIGHTS = [
   { title: 'Meet farmers directly', text: 'Understand the everyday challenges of dairy farming first-hand.' },
   { title: 'Visit working dairy businesses', text: 'From organic farms to cooperatives such as Amul and NDDB.' },
   { title: 'Take home ideas that scale', text: 'Technology, management and sustainable practices that lift livelihoods.' },
 ];
 
+/* Right side: Key Takeaways. `bold` is set heavy, `rest` light. */
+const TAKEAWAYS = [
+  { Icon: Sprout, bold: 'Learning', rest: 'in the field' },
+  { Icon: Handshake, bold: 'Networking', rest: '' },
+  { Icon: FlaskConical, bold: 'Scientific', rest: 'practices' },
+  { Icon: Tractor, bold: 'Machinery', rest: 'adoption' },
+];
+
+/* ---------- Diagram geometry (SVG units; the panel is 100 wide x 90 tall) ----------
+   The logo sits on the left; a curved line with four dots wraps around its right side,
+   and from each dot a connector runs out to that takeaway's icon and label. */
+const VB_W = 100;
+const VB_H = 90;
+const CX = 23; // centre of the logo
+const CY = 45;
+const LOGO_W = 44; // logo width, in panel units
+const ARC_R = 30; // the curved line
+const ARC_SPAN = 74; // the line runs from -74deg to +74deg (0 = pointing right)
+const DOT_SPAN = 66; // the four dots are spread over -66deg..+66deg
+const BEND_R = 40.5; // where each connector finishes bending outwards
+const RUN = 5; // straight run after the bend, before the icon
+
+const rad = (d) => (d * Math.PI) / 180;
+const pt = (r, d) => [CX + r * Math.cos(rad(d)), CY + r * Math.sin(rad(d))];
+
+const ITEMS = TAKEAWAYS.map((t, i) => {
+  const n = TAKEAWAYS.length;
+  const each = (2 * DOT_SPAN) / n;
+  const a = -DOT_SPAN + each * (i + 0.5);
+  const dot = pt(ARC_R, a);
+  const from = pt(ARC_R + 1.9, a); // start just outside the dot
+  const bend = pt(BEND_R, a);
+  const end = [bend[0] + RUN, bend[1]];
+  return {
+    ...t,
+    a,
+    dot,
+    end,
+    path: `M${from[0]} ${from[1]} Q${bend[0]} ${bend[1]} ${end[0]} ${end[1]}`,
+    color: i < 2 ? NAVY_LIGHT : NAVY,
+  };
+});
+
+const ARC = (() => {
+  const s = pt(ARC_R, -ARC_SPAN);
+  const e = pt(ARC_R, ARC_SPAN);
+  return { d: `M${s[0]} ${s[1]} A${ARC_R} ${ARC_R} 0 0 1 ${e[0]} ${e[1]}`, s, e };
+})();
+
+const pctX = (x) => `${(x / VB_W) * 100}%`;
+const pctY = (y) => `${(y / VB_H) * 100}%`;
+
 const serif = { fontFamily: '"Playfair Display", Georgia, serif' };
 
-/* ---------- Easy settings ----------
-   HEADER_HEIGHT = height of your sticky header once you have scrolled (used so the whole
-   section fits exactly in the space below it on laptops and desktops, lg and up).
-   On phones and tablets the section just flows naturally. */
+/* Height of the header once you've scrolled (the section fits in the screen below it) */
 const HEADER_HEIGHT = '72px';
 
-export default function Overview({ onOpenApply }) {
+export default function Overview() {
+  const ref = useRef(null);
+  const [on, setOn] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (!('IntersectionObserver' in window)) {
+      setOn(true);
+      return undefined;
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setOn(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const delay = (ms) => ({ transitionDelay: on ? `${ms}ms` : '0ms' });
+
   return (
     <section
       id="overview"
-      className="dy-ov bg-[#F8FAFC] px-4 py-20 font-sans text-[#0F172A] sm:px-6 sm:py-28"
-      style={{ '--hh': HEADER_HEIGHT }}
+      ref={ref}
+      className="dy-ov relative overflow-hidden py-20 font-sans sm:py-24"
+      style={{ '--hh': HEADER_HEIGHT, backgroundColor: PAPER, color: NAVY }}
     >
       <style>{`
-        /* Clicking "ABOUT" lands the section right under the sticky header */
         .dy-ov { scroll-margin-top: var(--hh); }
-
-        /* Phones and tablets: normal flowing layout */
-        .dy-ov-h2 { font-size: clamp(34px, 4.6vw, 52px); }
-
-        /* Laptops and desktops: the whole section fits in one screen.
-           Everything is sized from the screen height, the same idea the hero uses. */
         @media (min-width: 1024px) {
           .dy-ov {
-            --pad: clamp(14px, 3vh, 40px);                      /* top and bottom space */
-            --sh: calc(100vh - var(--hh));                       /* height of one screen below the header */
-            --mh: clamp(
-              260px,
-              min(calc(var(--sh) - 2 * var(--pad) - 44px), calc(46vw / 1.078)),
-              593px
-            );                                                   /* photo mosaic height */
-            min-height: calc(100vh - var(--hh));
-            display: flex;
-            align-items: center;
-            padding-top: var(--pad);
-            padding-bottom: var(--pad);
+            min-height: 100svh; display: flex; align-items: center;
+            padding-top: calc(var(--hh) + clamp(12px, 2.5vh, 32px));
+            padding-bottom: clamp(12px, 2.5vh, 32px);
           }
-          @supports (height: 100svh) {
-            .dy-ov { --sh: calc(100svh - var(--hh)); min-height: calc(100svh - var(--hh)); }
-          }
+        }
+        .dy-in   { transition: opacity 700ms ease, transform 800ms cubic-bezier(.16,1,.3,1); }
+        .dy-pop  { transition: opacity 650ms ease, transform 750ms cubic-bezier(.34,1.56,.64,1); }
+        .dy-draw { transition: stroke-dashoffset 1300ms cubic-bezier(.65,0,.35,1); }
+        .dy-tk   { transition: opacity 600ms ease, transform 700ms cubic-bezier(.16,1,.3,1); }
+        .dy-tk:hover .dy-chip { transform: scale(1.08); box-shadow: 0 10px 22px rgba(20,40,75,0.28); }
+        .dy-chip { transition: transform 300ms ease, box-shadow 300ms ease; }
 
-          .dy-ov-grid     { grid-template-columns: minmax(0, 1fr) auto; column-gap: clamp(32px, 5vw, 72px); }
-          .dy-ov-right    { width: calc(var(--mh) * 1.078); }
-          .dy-ov-mosaic   { width: 100%; max-width: none; height: var(--mh); }
-
-          .dy-ov-h2       { font-size: clamp(26px, min(3.6vw, 5.6vh), 50px); }
-          .dy-ov-lead     { font-size: clamp(13px, min(1.4vw, 2.2vh), 18px); line-height: 1.6; margin-top: clamp(10px, 2.2vh, 24px); }
-          .dy-ov-list     { margin-top: clamp(14px, 3.4vh, 40px); gap: clamp(10px, 2.6vh, 28px); }
-          .dy-ov-bar      { height: auto; margin-top: 3px; margin-bottom: 3px; }
-          .dy-ov-title    { font-size: clamp(15px, 2.5vh, 20px); }
-          .dy-ov-text     { font-size: clamp(12.5px, 2vh, 17px); line-height: 1.5; }
-          .dy-ov-caption  { max-width: none; margin-top: clamp(8px, 1.6vh, 20px); font-size: clamp(13px, 2vh, 15px); }
+        /* Bigger type on the left */
+        .dy-h2   { font-size: clamp(2.1rem, 6vw, 3.2rem); }
+        .dy-p    { font-size: clamp(1rem, 2.4vw, 1.15rem); }
+        .dy-hl-t { font-size: 1.2rem; }
+        .dy-hl-p { font-size: 1.02rem; }
+        /* Takeaway labels scale with the panel */
+        .dy-lab  { font-size: clamp(11px, 3.2vw, 19px); }
+        @media (min-width: 1024px) {
+          .dy-h2   { font-size: clamp(2.3rem, min(3.9vw, 6.6vh), 4rem); }
+          .dy-p    { font-size: clamp(1rem, min(1.35vw, 2.35vh), 1.3rem); }
+          .dy-hl-t { font-size: clamp(1.02rem, min(1.5vw, 2.6vh), 1.45rem); }
+          .dy-hl-p { font-size: clamp(.9rem, min(1.2vw, 2.1vh), 1.12rem); }
+          .dy-lab  { font-size: clamp(12px, min(1.3vw, 2.3vh), 20px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .dy-in, .dy-pop, .dy-draw, .dy-tk, .dy-chip { transition: none !important; }
         }
       `}</style>
 
-      {/* ======================== About: text + photos ======================== */}
-      <div className="dy-ov-grid mx-auto grid w-full max-w-6xl items-center gap-16">
-
-        {/* Text */}
+      <div className="mx-auto grid w-full max-w-[1500px] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-[clamp(16px,2.5vw,40px)] lg:pl-[clamp(24px,4vw,72px)] lg:pr-[clamp(12px,1.5vw,28px)]">
+        {/* ============ Left: About (unchanged) ============ */}
         <div className="min-w-0">
-          <ScrollReveal animation="fade-up" delay={100} duration={600}>
-            <h2
-              className="dy-ov-h2 leading-[1.12] text-[#0F172A]"
-              style={{ ...serif, fontWeight: 600 }}
-            >
-              Beyond the farm: uniting 40 visionary entrepreneurs
-            </h2>
-            <p className="dy-ov-lead mt-6 text-[18px] leading-[1.7] text-[#475569]">
-              Dairy Yatra is a 15-day journey that takes 40 entrepreneurs across five states of India to
-              explore the dairy sector up close. Together they meet farmers, see dairy businesses at work,
-              and look for ideas that can improve productivity and profitability across the country.
-            </p>
-          </ScrollReveal>
+          <div
+            className={`dy-in mb-5 flex items-center gap-3 text-[12px] font-bold uppercase tracking-[0.3em] lg:text-[13px] ${on ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
+            style={{ color: NAVY_LIGHT }}
+          >
+            <span className="h-px w-12" style={{ backgroundColor: NAVY_LIGHT }} />
+            About the Yatra
+          </div>
 
-          <ul className="dy-ov-list mt-10 flex flex-col gap-7">
+          <h2
+            className={`dy-in dy-h2 font-semibold leading-[1.1] tracking-[-0.01em] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+            style={{ ...serif, ...delay(80) }}
+          >
+            Beyond the farm: uniting 40 visionary entrepreneurs
+          </h2>
+
+          <p
+            className={`dy-in dy-p mt-6 max-w-[42rem] leading-[1.7] lg:mt-[clamp(14px,2.6vh,28px)] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+            style={{ ...delay(180), color: '#3E4E68' }}
+          >
+            Dairy Yatra is a 15-day journey that takes 40 entrepreneurs across five states of India to explore the
+            dairy sector up close. Together they meet farmers, see dairy businesses at work, and look for ideas
+            that can improve productivity and profitability across the country.
+          </p>
+
+          <ul className="mt-10 flex flex-col gap-6 lg:mt-[clamp(18px,3.4vh,40px)] lg:gap-[clamp(12px,2.6vh,28px)]">
             {HIGHLIGHTS.map((h, i) => (
-              <li key={h.title}>
-                <ScrollReveal animation="fade-up" delay={200 + i * 100} duration={600}>
-                  <div className="flex gap-4">
-                    <span className="dy-ov-bar mt-1 h-12 w-1 shrink-0 rounded-full bg-[#F59E0B]" aria-hidden="true" />
-                    <div>
-                      <h3 className="dy-ov-title text-[20px] font-semibold text-[#0F172A]">{h.title}</h3>
-                      <p className="dy-ov-text mt-1 text-[17px] leading-relaxed text-[#64748B]">{h.text}</p>
-                    </div>
-                  </div>
-                </ScrollReveal>
+              <li
+                key={h.title}
+                className={`dy-in flex gap-5 ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+                style={delay(300 + i * 110)}
+              >
+                <span className="mt-1 w-[5px] shrink-0 rounded-full" style={{ backgroundColor: NAVY }} aria-hidden="true" />
+                <div>
+                  <h3 className="dy-hl-t font-semibold leading-snug">{h.title}</h3>
+                  <p className="dy-hl-p mt-1 leading-relaxed" style={{ color: '#5A6880' }}>
+                    {h.text}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Photos: one mosaic, frames of different shapes */}
-        <div className="dy-ov-right">
-          <ScrollReveal animation="fade-up" delay={200} duration={700}>
-            <div
-              className="dy-ov-mosaic mx-auto grid w-full max-w-[640px] gap-[6px] sm:gap-2 lg:ml-auto"
-              style={{ gridTemplateColumns: 'repeat(14, 1fr)', gridTemplateRows: 'repeat(13, 1fr)', aspectRatio: '1.078' }}
-            >
-              {PHOTOS.map((p) => (
-                <div
-                  key={p.n}
-                  className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-[#16325c] to-[#2B6CB0] sm:rounded-xl"
-                  style={{ gridColumn: p.c, gridRow: p.r }}
-                >
-                  {BY_NUMBER[p.n] && (
-                    <img
-                      src={BY_NUMBER[p.n]}
-                      alt={p.alt}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      style={{ objectPosition: p.pos || '50% 50%' }}
-                      loading="lazy"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+        {/* ============ Right: logo + curved line + connected takeaways ============ */}
+        <div className="min-w-0">
+          <div
+            className="relative mx-auto w-full lg:ml-auto lg:mr-0"
+            style={{ aspectRatio: `${VB_W} / ${VB_H}`, maxWidth: `min(100%, calc((100svh - 110px) * ${VB_W / VB_H}))` }}
+          >
+            <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${VB_W} ${VB_H}`} aria-hidden="true">
+              <defs>
+                <linearGradient id="dyArc" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={NAVY_LIGHT} stopOpacity="0.35" />
+                  <stop offset="30%" stopColor={NAVY_LIGHT} />
+                  <stop offset="100%" stopColor={NAVY} />
+                </linearGradient>
+              </defs>
 
-            <p className="dy-ov-caption mx-auto mt-5 flex max-w-[640px] items-center gap-3 text-[15px] text-[#64748B] lg:ml-auto">
-              <span className="h-px w-8 bg-[#F59E0B]" aria-hidden="true" />
-              Farms, institutions and businesses across India
-            </p>
-          </ScrollReveal>
+              {/* the curved line around the logo */}
+              <path
+                d={ARC.d}
+                fill="none"
+                stroke="url(#dyArc)"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                pathLength="1"
+                strokeDasharray="1"
+                className="dy-draw"
+                style={{ ...delay(250), strokeDashoffset: on ? 0 : 1 }}
+              />
+              <circle cx={ARC.s[0]} cy={ARC.s[1]} r="0.9" fill={PAPER} stroke={NAVY_LIGHT} strokeWidth="0.45" />
+              <circle cx={ARC.e[0]} cy={ARC.e[1]} r="1.1" fill={NAVY} />
+
+              {/* connectors from each dot out to its takeaway */}
+              {ITEMS.map((it, i) => (
+                <path
+                  key={`c-${i}`}
+                  d={it.path}
+                  fill="none"
+                  stroke={it.color}
+                  strokeWidth="0.55"
+                  strokeLinecap="round"
+                  pathLength="1"
+                  strokeDasharray="1"
+                  className="dy-draw"
+                  style={{ ...delay(800 + i * 170), strokeDashoffset: on ? 0 : 1, transitionDuration: '700ms' }}
+                />
+              ))}
+
+              {/* the dots on the line */}
+              {ITEMS.map((it, i) => (
+                <circle
+                  key={`d-${i}`}
+                  cx={it.dot[0]}
+                  cy={it.dot[1]}
+                  r="1.4"
+                  fill="#FFFFFF"
+                  stroke={it.color}
+                  strokeWidth="0.6"
+                  className="dy-pop"
+                  style={{
+                    ...delay(650 + i * 170),
+                    opacity: on ? 1 : 0,
+                    transformBox: 'fill-box',
+                    transformOrigin: 'center',
+                    transform: on ? 'scale(1)' : 'scale(0)',
+                  }}
+                />
+              ))}
+            </svg>
+
+            {/* logo, no circle behind it */}
+            <img
+              src={LOGO_URL}
+              alt="Dairy Yatra"
+              className="dy-pop absolute z-10 object-contain"
+              style={{
+                ...delay(120),
+                left: pctX(CX),
+                top: pctY(CY),
+                width: `${LOGO_W}%`,
+                transform: on ? 'translate(-50%,-50%) scale(1)' : 'translate(-50%,-50%) scale(0.75)',
+                opacity: on ? 1 : 0,
+              }}
+            />
+
+            {/* takeaways: icon + heading, at the end of each connector */}
+            {ITEMS.map((it, i) => {
+              const { Icon } = it;
+              return (
+                <div
+                  key={it.bold}
+                  className="dy-tk dy-lab absolute z-10 flex items-center gap-[0.7em]"
+                  style={{
+                    ...delay(1050 + i * 170),
+                    left: pctX(it.end[0]),
+                    top: pctY(it.end[1]),
+                    transform: on ? 'translateY(-50%)' : 'translate(-10px, -50%)',
+                    opacity: on ? 1 : 0,
+                  }}
+                >
+                  <span
+                    className="dy-chip flex shrink-0 items-center justify-center rounded-full text-white shadow-[0_8px_18px_rgba(20,40,75,0.2)]"
+                    style={{ width: '2.6em', height: '2.6em', backgroundColor: it.color }}
+                  >
+                    <Icon style={{ width: '1.25em', height: '1.25em' }} strokeWidth={2} aria-hidden="true" />
+                  </span>
+                  <p className="whitespace-nowrap uppercase leading-[1.15] tracking-[0.03em]" style={{ color: it.color }}>
+                    <span className="font-extrabold">{it.bold}</span>
+                    {it.rest && (
+                      <>
+                        <br />
+                        <span className="font-normal">{it.rest}</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-
     </section>
   );
 }

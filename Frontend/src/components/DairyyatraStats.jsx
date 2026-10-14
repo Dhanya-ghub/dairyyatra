@@ -34,7 +34,7 @@ const STATS = [
   { value: 5, label: 'States' },
   { value: 15, label: 'Days' },
   { value: 15, label: 'Farms, institutions & businesses' },
-  { value: 40, label: 'Entrepreneurs' },
+  { value: 40, label: 'Fellows' },
   { value: 150, label: 'Hours of learning' },
   { value: '6000+', unit: 'km', label: 'Journey across India' },
 ];

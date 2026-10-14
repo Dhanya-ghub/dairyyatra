@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import AdminLogin from './AdminLogin';
-import AdminDashboard from './AdminDashboard';
+import AdminLogin from './Adminlogin';
+import AdminDashboard from './Admindashboard';
 import { getToken, clearToken } from './adminApi';
 
 export default function AdminPortal() {

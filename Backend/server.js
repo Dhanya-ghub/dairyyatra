@@ -8,7 +8,8 @@ import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { createClient } from '@supabase/supabase-js';
+// Our own Postgres (in Docker) instead of Supabase. See db.js for how the connection works.
+import { query, withTransaction } from './db.js';
 
 dotenv.config();
 
@@ -17,8 +18,7 @@ dotenv.config();
 // ============================================================
 
 const REQUIRED_ENV = [
-  'SUPABASE_URL',
-  'SUPABASE_SERVICE_ROLE_KEY',
+  'DATABASE_URL', // was SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
   'JWT_SECRET',
   'ADMIN_USERNAME',
   'ADMIN_PASSWORD',
@@ -46,7 +46,9 @@ const ALLOWED_ORIGINS = (process.env.FRONTEND_URL || 'http://localhost:5173')
 const VALID_STATUSES = ['SUBMITTED', 'SHORTLISTED', 'WAITLISTED', 'REJECTED'];
 const GENDERS = ['Male', 'Female', 'Other'];
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+// Names of the unique rules in db/init/01_schema.sql. When an INSERT breaks one, Postgres tells us
+// which one in err.constraint, so we no longer have to search the error message text.
+const UNIQUE_APPLICATION_ID = 'eoi_applications_application_id_key';
 
 // ============================================================
 // APP + MIDDLEWARE
@@ -226,11 +228,19 @@ function mapDatabaseToFrontend(row) {
 // HEALTH
 // ============================================================
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
   const now = new Date();
-  res.json({
-    success: true,
-    message: 'Dairy Yatra API is running',
+  // Also check the database answers, so Docker (or you) can tell when it is down
+  let database = true;
+  try {
+    await query('SELECT 1');
+  } catch {
+    database = false;
+  }
+  res.status(database ? 200 : 503).json({
+    success: database,
+    message: database ? 'Dairy Yatra API is running' : 'Database is not reachable',
+    database,
     time: now.toISOString(),
     eoiOpen: now >= EOI_OPENS && now <= EOI_CLOSES,
     eoiOpensAt: EOI_OPENS.toISOString(),
@@ -267,26 +277,30 @@ app.post('/api/submissions', submitLimiter, async (req, res) => {
   // 3. Insert (retry only if the random reference ID collides)
   try {
     for (let attempt = 0; attempt < 3; attempt++) {
-      const { data, error } = await supabase
-        .from('eoi_applications')
-        .insert([mapApplicationToDatabase(formData)])
-        .select('*')
-        .single();
+      // Was: supabase.from('eoi_applications').insert([row]).select('*').single()
+      // Now: one INSERT ... RETURNING *  (RETURNING sends the saved row back, like .select('*'))
+      const row = mapApplicationToDatabase(formData);
+      const columns = Object.keys(row); // fixed list from our own mapper, never from the visitor
+      const values = Object.values(row);
+      const placeholders = columns.map((_, i) => `$${i + 1}`).join(', '); // $1, $2, $3 ...
 
-      if (!error) {
-        return res.status(201).json({ success: true, submissionRecord: mapDatabaseToFrontend(data) });
+      try {
+        const { rows } = await query(
+          `INSERT INTO eoi_applications (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`,
+          values
+        );
+        return res.status(201).json({ success: true, submissionRecord: mapDatabaseToFrontend(rows[0]) });
+      } catch (error) {
+        // 23505 = "unique rule broken" (same code Supabase passed on, because it is Postgres underneath)
+        if (error.code === '23505') {
+          if (error.constraint === UNIQUE_APPLICATION_ID) continue; // random ID collided: try a new one
+          return res.status(409).json({
+            error: 'DUPLICATE',
+            message: 'An application with this WhatsApp number or email already exists.',
+          });
+        }
+        throw error;
       }
-
-      if (error.code === '23505') {
-        const msg = `${error.message} ${error.details || ''}`;
-        if (msg.includes('application_id')) continue; // ID collision, try again
-        return res.status(409).json({
-          error: 'DUPLICATE',
-          message: 'An application with this WhatsApp number or email already exists.',
-        });
-      }
-
-      throw error;
     }
 
     throw new Error('Could not generate a unique application ID');
@@ -338,27 +352,36 @@ app.get('/api/admin/submissions', authenticateAdmin, async (req, res) => {
   const { search, status, sort } = req.query;
 
   try {
-    let query = supabase
-      .from('eoi_applications')
-      .select('id, application_id, full_name, email, whatsapp, secondary_no, city, state, occupation, status, submitted_at');
+    // Was: supabase.from(...).select(...).or(...ilike...).eq('status', ...).order('submitted_at')
+    // Now: we build the WHERE part step by step. Every visitor value goes into `params`
+    // and is referred to as $1, $2 ... so it can never change the SQL itself.
+    const where = [];
+    const params = [];
 
     if (typeof search === 'string' && search.trim()) {
-      // strip characters that have meaning inside a PostgREST .or() filter
-      const s = search.replace(/[,()%*\\]/g, ' ').trim().slice(0, 60);
-      if (s) {
-        query = query.or(`full_name.ilike.%${s}%,email.ilike.%${s}%,application_id.ilike.%${s}%,whatsapp.ilike.%${s}%`);
-      }
+      const s = search.trim().slice(0, 60);
+      // In ILIKE, % and _ are wildcards; put a \ in front so a typed % or _ is searched literally
+      params.push(`%${s.replace(/[\\%_]/g, '\\$&')}%`);
+      const p = `$${params.length}`;
+      where.push(`(full_name ILIKE ${p} OR email ILIKE ${p} OR application_id ILIKE ${p} OR whatsapp ILIKE ${p})`);
     }
 
     if (typeof status === 'string' && VALID_STATUSES.includes(status)) {
-      query = query.eq('status', status);
+      params.push(status);
+      where.push(`status = $${params.length}`);
     }
 
-    query = query.order('submitted_at', { ascending: sort === 'asc' });
+    // The sort direction is chosen by us (ASC or DESC), never copied from the visitor
+    const direction = sort === 'asc' ? 'ASC' : 'DESC';
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return res.json(data);
+    const { rows } = await query(
+      `SELECT id, application_id, full_name, email, whatsapp, secondary_no, city, state, occupation, status, submitted_at
+         FROM eoi_applications
+         ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+         ORDER BY submitted_at ${direction}`,
+      params
+    );
+    return res.json(rows);
   } catch (err) {
     console.error('Admin list error:', err.message);
     return res.status(500).json({ error: 'Failed to retrieve applications' });
@@ -371,15 +394,10 @@ app.get('/api/admin/submissions', authenticateAdmin, async (req, res) => {
 
 app.get('/api/admin/submissions/:refId', authenticateAdmin, async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('eoi_applications')
-      .select('*')
-      .eq('application_id', req.params.refId)
-      .maybeSingle();
-
-    if (error) throw error;
-    if (!data) return res.status(404).json({ error: 'Application not found' });
-    return res.json(mapDatabaseToFrontend(data));
+    // Was: supabase.from(...).select('*').eq('application_id', refId).maybeSingle()
+    const { rows } = await query('SELECT * FROM eoi_applications WHERE application_id = $1', [req.params.refId]);
+    if (!rows[0]) return res.status(404).json({ error: 'Application not found' });
+    return res.json(mapDatabaseToFrontend(rows[0]));
   } catch (err) {
     console.error('Admin get error:', err.message);
     return res.status(500).json({ error: 'Failed to retrieve application' });
@@ -398,43 +416,56 @@ app.patch('/api/admin/submissions/:refId/status', authenticateAdmin, async (req,
   }
 
   try {
-    const { data: current, error: findErr } = await supabase
-      .from('eoi_applications')
-      .select('status')
-      .eq('application_id', req.params.refId)
-      .maybeSingle();
+    // Was: three separate Supabase calls (find -> count shortlisted -> update).
+    // Now: the same three steps as SQL, inside ONE transaction. The advisory lock makes two admins
+    // clicking "Shortlist" at the same moment wait for each other, so the seat limit can't be overshot.
+    const result = await withTransaction(async (client) => {
+      await client.query("SELECT pg_advisory_xact_lock(hashtext('eoi_shortlist'))");
 
-    if (findErr) throw findErr;
-    if (!current) return res.status(404).json({ error: 'Application not found' });
+      const found = await client.query('SELECT status FROM eoi_applications WHERE application_id = $1', [
+        req.params.refId,
+      ]);
+      const current = found.rows[0];
+      if (!current) return { notFound: true };
 
-    // Enforce the cohort seat limit
-    if (status === 'SHORTLISTED' && current.status !== 'SHORTLISTED') {
-      const { count, error: countErr } = await supabase
-        .from('eoi_applications')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'SHORTLISTED');
-      if (countErr) throw countErr;
-      if (count >= SEAT_LIMIT) {
-        return res.status(400).json({
-          error: 'SEAT_LIMIT_REACHED',
-          message: `Seat limit of ${SEAT_LIMIT} reached. Move someone out of SHORTLISTED first.`,
-        });
+      // Enforce the cohort seat limit
+      if (status === 'SHORTLISTED' && current.status !== 'SHORTLISTED') {
+        const counted = await client.query(
+          "SELECT COUNT(*)::int AS count FROM eoi_applications WHERE status = 'SHORTLISTED'"
+        );
+        if (counted.rows[0].count >= SEAT_LIMIT) return { seatLimit: true };
       }
+
+      // Only these two columns can ever be changed here. updated_at (and shortlisted_at) are set
+      // automatically by the database trigger eoi_before_update_trg.
+      const sets = [];
+      const params = [];
+      if (status !== undefined) {
+        params.push(status);
+        sets.push(`status = $${params.length}`);
+      }
+      if (adminNotes !== undefined) {
+        params.push(typeof adminNotes === 'string' ? adminNotes.slice(0, 2000) : null);
+        sets.push(`admin_notes = $${params.length}`);
+      }
+      if (!sets.length) sets.push('updated_at = now()'); // nothing to change: just "touch" the row
+
+      params.push(req.params.refId);
+      const updated = await client.query(
+        `UPDATE eoi_applications SET ${sets.join(', ')} WHERE application_id = $${params.length} RETURNING *`,
+        params
+      );
+      return { row: updated.rows[0] };
+    });
+
+    if (result.notFound) return res.status(404).json({ error: 'Application not found' });
+    if (result.seatLimit) {
+      return res.status(400).json({
+        error: 'SEAT_LIMIT_REACHED',
+        message: `Seat limit of ${SEAT_LIMIT} reached. Move someone out of SHORTLISTED first.`,
+      });
     }
-
-    const update = { updated_at: new Date().toISOString() };
-    if (status !== undefined) update.status = status;
-    if (adminNotes !== undefined) update.admin_notes = typeof adminNotes === 'string' ? adminNotes.slice(0, 2000) : null;
-
-    const { data, error } = await supabase
-      .from('eoi_applications')
-      .update(update)
-      .eq('application_id', req.params.refId)
-      .select('*')
-      .single();
-
-    if (error) throw error;
-    return res.json({ success: true, submissionRecord: mapDatabaseToFrontend(data) });
+    return res.json({ success: true, submissionRecord: mapDatabaseToFrontend(result.row) });
   } catch (err) {
     console.error('Admin status error:', err.message);
     return res.status(500).json({ error: 'Failed to update application status' });
@@ -478,4 +509,8 @@ app.listen(PORT, () => {
   console.log(`Dairy Yatra API running on port ${PORT}`);
   console.log(`EOI window: ${EOI_OPENS.toISOString()} to ${EOI_CLOSES.toISOString()}`);
   console.log(`Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
+  // Check the database once at start-up, so a wrong DATABASE_URL shows up immediately
+  query('SELECT 1')
+    .then(() => console.log('Connected to Postgres'))
+    .catch((err) => console.error('Could not connect to Postgres:', err.message));
 });

@@ -1,0 +1,15 @@
+node_modules
+dist
+.env
+.env.*
+Images
+Knowledge Institute logo
+partners logo
+stitch_dairy_yatra_beyond_the_farm.zip
+*.zip
+Brochure.pdf
+Dairy Yatra 2025_Brochure..pdf
+Recording*.mp4
+ref_video.mp4
+standalone_preview.html
+vite.config.js.timestamp-*

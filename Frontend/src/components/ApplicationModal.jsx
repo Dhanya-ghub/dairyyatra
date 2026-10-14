@@ -1,5 +1,5 @@
 import React from 'react';
-import EoiPortal from './portal/EOIPortal';
+import EoiPortal from './portal/EoiPortal';
 
 export default function ApplicationModal({ isOpen, onClose }) {
   return (

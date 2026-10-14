@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
-const AdminPortal = lazy(() => import('./components/admin/AdminPortal'))
+const AdminPortal = lazy(() => import('./components/admin/Adminportal'))
 const isAdminRoute = window.location.pathname.startsWith('/admin')
 
 ReactDOM.createRoot(document.getElementById('root')).render(

@@ -199,8 +199,8 @@ export default function FullOverviewModal({ isOpen, onClose, onOpenApply, onSele
         {/* Footer Actions */}
         <div className="p-4 sm:p-6 bg-[#F2EFE7] border-t border-[#C8DFDB] flex flex-wrap items-center justify-between gap-4 shrink-0">
           <a
-            href="/Dairy_Yatra_2025_Brochure.pdf"
-            download="Dairy_Yatra_2025_Brochure.pdf"
+            href="/Dairy_Yatra_2027_Brochure.pdf"
+            download="Dairy_Yatra_2027_Brochure.pdf"
             className="flex items-center gap-1.5 text-xs font-bold text-[#3368A0] hover:underline"
           >
             <Download className="w-4 h-4" /> Download Official Brochure PDF

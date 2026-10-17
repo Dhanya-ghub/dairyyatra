@@ -491,7 +491,7 @@ export default function Itinerary() {
                   Day-by-Day Roadmap
                 </span>
               </div>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-[#172738]">
+              <h2 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold text-[#172738]">
                 The Complete 15-Day Schedule
               </h2>
             </div>
@@ -817,7 +817,7 @@ export default function Itinerary() {
 
                         <div className="md:col-span-2 flex items-center gap-3">
                           <div className="relative">
-                            <span className="w-10 h-10 rounded-xl bg-[#3368A0] text-white font-serif font-bold text-sm flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:bg-[#234974] transition-all duration-300">
+                            <span className="w-10 h-10 rounded-xl bg-[#3368A0] text-white font-sans font-bold text-sm flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:bg-[#234974] transition-all duration-300">
                               D{item.day}
                             </span>
                           </div>
@@ -832,7 +832,7 @@ export default function Itinerary() {
                         </div>
 
                         <div className="md:col-span-4">
-                          <span className="font-serif font-bold text-base text-[#172738] group-hover:text-[#3368A0] transition-colors block">
+                          <span className="font-sans font-bold text-base text-[#172738] group-hover:text-[#3368A0] transition-colors block">
                             {item.institution}
                           </span>
                         </div>

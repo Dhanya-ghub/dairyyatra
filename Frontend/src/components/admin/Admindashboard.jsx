@@ -187,7 +187,7 @@ export default function AdminDashboard({ onLogout }) {
       <header className="bg-[#142538] text-white border-b border-[#3368A0]/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div>
-            <span className="font-serif text-xl font-bold">DAIRY YATRA 2027</span>
+            <span className="font-sans text-xl font-bold">DAIRY YATRA 2027</span>
             <span className="ml-3 text-[10px] uppercase tracking-widest font-bold text-[#C8DFDB]">Selection Panel</span>
           </div>
           <button
@@ -312,7 +312,7 @@ export default function AdminDashboard({ onLogout }) {
             <div className="sticky top-0 bg-white border-b border-[#C8DFDB] px-6 py-4 flex items-center justify-between z-10">
               <div>
                 <div className="font-mono text-xs text-[#4E657D]">{openRef}</div>
-                <div className="font-serif text-xl font-bold">{d?.fullName || 'Loading...'}</div>
+                <div className="font-sans text-xl font-bold">{d?.fullName || 'Loading...'}</div>
               </div>
               <button onClick={closeDetail} className="p-2 rounded-lg hover:bg-[#F2EFE7] cursor-pointer" aria-label="Close">
                 <X className="w-5 h-5" />

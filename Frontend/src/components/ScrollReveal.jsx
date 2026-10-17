@@ -9,7 +9,7 @@ export default function ScrollReveal({
   animation = 'fade-up', // 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom-in' | 'zoom-out' | 'fade'
   delay = 0, // delay in ms
   duration = 700, // duration in ms
-  threshold = 0.15, // trigger when 15% visible
+  threshold = 0, // trigger as soon as the element's top edge is on screen (a % threshold never fires for very tall elements on phones)
   className = '',
   style = {},
   once = true,
@@ -41,7 +41,7 @@ export default function ScrollReveal({
       },
       {
         threshold,
-        rootMargin: '0px 0px -40px 0px' // Slightly trigger before bottom edge for snappier feel
+        rootMargin: '0px 0px -8% 0px' // ...a little above the bottom edge
       }
     );
 

@@ -1,65 +1,104 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { FULL_ITINERARY } from '../data/yatraData';
-import * as ItineraryModule from './Itinerary';
 import { MAP_W, MAP_H, OUTLINE_D, BORDERS_D, ROUTE_STATE_SHAPES } from './indiaMapData';
 import day1Image from '../../dairy_yatra_15_day_images/day1.jpeg';
-import day2Image from '../../dairy_yatra_15_day_images/day2.jpeg';
-import day3Image from '../../dairy_yatra_15_day_images/day3.jpeg';
-import day4Image from '../../dairy_yatra_15_day_images/day4.jpeg';
-import day5Image from '../../dairy_yatra_15_day_images/day5.jpeg';
-import day6Image from '../../dairy_yatra_15_day_images/day6.jpeg';
-import day7Image from '../../dairy_yatra_15_day_images/day7.jpeg';
-import day8Image from '../../dairy_yatra_15_day_images/day8.jpeg';
-import day9Image from '../../dairy_yatra_15_day_images/day9.jpeg';
-import day10Image from '../../dairy_yatra_15_day_images/day10.jpeg';
-import day11Image from '../../dairy_yatra_15_day_images/day11.jpeg';
+import akshayakalpaImage from '../assets/route/akshayakalpa.jpg';
+import gokulImage from '../assets/route/gokul.jpg';
+import nddbImage from '../assets/route/nddb.jpg';
+import amulImage from '../assets/route/amul.jpg';
+import banasImage from '../assets/route/banas.jpg';
+import cirbImage from '../assets/route/cirb.jpg';
+import pdfaImage from '../assets/route/pdfa.jpg';
 import day12Image from '../../dairy_yatra_15_day_images/day12.jpeg';
-import day13Image from '../../dairy_yatra_15_day_images/day13.jpeg';
-import day14Image from '../../dairy_yatra_15_day_images/day14.jpeg';
-import day15Image from '../../dairy_yatra_15_day_images/day15.jpeg';
+import farmersImage from '../assets/route/farmers.jpg';
 
-const DAY_IMAGES = [
-  day1Image,
-  day2Image,
-  day3Image,
-  day4Image,
-  day5Image,
-  day6Image,
-  day7Image,
-  day8Image,
-  day9Image,
-  day10Image,
-  day11Image,
-  day12Image,
-  day13Image,
-  day14Image,
-  day15Image,
+/* ------------------------------------------------------------ Stops ----
+   The journey, one stop at a time, in travel order. Scrolling (or swiping) moves to the next stop.
+   place  = small line above the heading
+   title  = the heading
+   text   = the description
+   state  = which state on the map (a code from ROUTE_ORDER below)
+   media  = the full-screen background. A photo: { type: 'image', src: photo }.
+            A video later: { type: 'video', src: clip, poster: photo } (import the clip like the photos above). */
+const STOPS = [
+  {
+    place: 'Coimbatore, Tamil Nadu',
+    title: 'Journey Begins',
+    text: 'Kumaraguru Institutions sets the stage for Dairy Yathra by igniting the vision and setting the stage for a transformative dairy learning journey.',
+    state: 'TN',
+    media: { type: 'image', src: day1Image },
+  },
+  {
+    place: 'Tiptur, Karnataka',
+    title: 'Akshayakalpa Organic',
+    text: 'Akshayakalpa Organic promotes sustainable dairy farming through organic production practices, farmer capacity building, and a focus on milk quality.',
+    state: 'KA',
+    media: { type: 'image', src: akshayakalpaImage },
+  },
+  {
+    place: 'Kolhapur, Maharashtra',
+    title: 'Gokul Dairy',
+    text: 'Gokul Dairy, a prominent cooperative dairy federation in Maharashtra, demonstrates the role of scientific cattle nutrition and cooperative management in enhancing dairy productivity.',
+    state: 'MH',
+    media: { type: 'image', src: gokulImage },
+  },
+  {
+    place: 'Anand, Gujarat',
+    title: 'National Dairy Development Board',
+    text: "National Dairy Development Board (NDDB), a national institution dedicated to strengthening India's dairy sector, advances cooperative development, institutional capacity, and farmer-centric dairy systems.",
+    state: 'GJ',
+    media: { type: 'image', src: nddbImage },
+  },
+  {
+    place: 'Anand, Gujarat',
+    title: 'Amul Dairy',
+    text: 'Amul Dairy, a pioneering dairy cooperative brand, exemplifies the impact of farmer-owned institutions in building an integrated dairy value chain and strengthening rural livelihoods.',
+    state: 'GJ',
+    media: { type: 'image', src: amulImage },
+  },
+  {
+    place: 'Palanpur, Gujarat',
+    title: 'Banas Dairy',
+    text: "Banas Dairy, one of India's leading dairy cooperative organisations, showcases large-scale milk procurement, processing, and value creation through a farmer-owned enterprise model.",
+    state: 'GJ',
+    media: { type: 'image', src: banasImage },
+  },
+  {
+    place: 'Bikaner, Rajasthan',
+    title: 'ICAR–National Research Centre on Camel',
+    text: 'ICAR–National Research Centre on Camel (NRCC) undertakes specialised research on camel health, production, and utilisation, highlighting opportunities for camel milk and diversified livestock-based livelihoods.',
+    state: 'RJ',
+    media: { type: 'image', src: day12Image },
+  },
+  {
+    place: 'Hisar, Haryana',
+    title: 'ICAR–Central Institute for Research on Buffaloes',
+    text: 'ICAR–Central Institute for Research on Buffaloes (CIRB) advances research in buffalo genetics, breeding, and reproductive management to improve productivity and strengthen scientific dairy practices.',
+    state: 'HR',
+    media: { type: 'image', src: cirbImage },
+  },
+  {
+    place: 'Ludhiana, Punjab',
+    title: 'Progressive Dairy Farmers Association',
+    text: 'Progressive Dairy Farmers Association (PDFA) provides a platform for progressive dairy farmers, industry stakeholders, and technology providers to exchange knowledge and explore advancements in dairy farming through its cattle show and dairy fair.',
+    state: 'PB',
+    media: { type: 'image', src: pdfaImage },
+  },
+  {
+    place: 'Coimbatore, Tamil Nadu',
+    title: 'Journey Concludes',
+    text: 'The journey concludes with practical insights, institutional connections, and actionable ideas to strengthen dairy entrepreneurship, improve farm-level practices, and advance farmer livelihoods.',
+    state: 'TN',
+    media: { type: 'image', src: farmersImage },
+  },
 ];
 
-/* ------------------------------------------------------------ Media ----
-   Each day's full-screen background comes from DAY_MEDIA.
-   Right now every day uses its photo. To switch a day to a video later, import the
-   clip and replace that day's entry. Nothing else in this file needs to change:
-
-     import day1Video from '../../Bg videos/day1.mp4';
-     DAY_MEDIA[0] = { type: 'video', src: day1Video, poster: day1Image };
-
-   (poster = the still shown while the video loads) */
-const DAY_MEDIA = DAY_IMAGES.map((src) => ({ type: 'image', src }));
-
-/* Your journey texts, card photos and timeline labels live in Itinerary.jsx (MASTERS_JOURNEY_DATA).
-   Add the word `export` in front of  "const MASTERS_JOURNEY_DATA"  in that file so they can be used here. */
-const MASTERS = ItineraryModule.MASTERS_JOURNEY_DATA || {};
-
 /* ------------------------------------------------------------ Route: states, not places ----
-   The journey is shown state by state. Codes match ROUTE_STATE_SHAPES in indiaMapData.js:
-   TN Tamil Nadu, KA Karnataka, MH Maharashtra, GJ Gujarat, RJ Rajasthan, HR Haryana, PB Punjab, TG Telangana */
-const ROUTE_ORDER = ['TN', 'KA', 'MH', 'GJ', 'RJ', 'HR', 'PB', 'TG'];
+   The states in travel order. Codes match ROUTE_STATE_SHAPES in indiaMapData.js.
+   After the last state the route returns to Tamil Nadu. */
+const ROUTE_ORDER = ['TN', 'KA', 'MH', 'GJ', 'RJ', 'HR', 'PB'];
 
-/* Which state each day (Day 1 ... Day 15) is in, as a position in ROUTE_ORDER above
-   (0 = Tamil Nadu, 1 = Karnataka, 2 = Maharashtra, 3 = Gujarat, 4 = Rajasthan, 5 = Haryana, 6 = Punjab, 7 = Telangana).
-   👉 Check this against the final itinerary and change the numbers if a day is in a different state. */
-const DAY_STATE = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7, 7, 0];
+const STOP_STATE = STOPS.map((st) => ROUTE_ORDER.indexOf(st.state));
+const STOP_MEDIA = STOPS.map((st) => st.media);
 
 const STATES = ROUTE_ORDER.map((code) => ROUTE_STATE_SHAPES[code]);
 const POINTS = STATES.map((st) => st.center);
@@ -71,13 +110,19 @@ const CUM = ROUTE.reduce((acc, pt, i) => {
 }, []);
 const TOTAL_LEN = CUM[CUM.length - 1];
 
-/* How far along the route each day is (the last day completes the loop back home) */
-const DAY_LEG = DAY_STATE.map((st, d) => (d === DAY_STATE.length - 1 && st === 0 ? ROUTE_ORDER.length : st));
+/* How far along the route each stop is (the last stop completes the loop back home) */
+const STOP_LEG = STOP_STATE.map((st, d) => (d === STOP_STATE.length - 1 && st === 0 ? ROUTE_ORDER.length : st));
 
 /* ------------------------------------------------------------ Styles ---- */
 const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
 .jx-display { font-family: "Oswald", "Bebas Neue", "Arial Narrow", Impact, sans-serif; }
+
+/* Map box: on phones it fills the height left under the text; on desktop it is sized from the screen height */
+.jx-mapbox { height: 100%; max-width: 100%; aspect-ratio: ${MAP_W} / ${MAP_H}; margin: 0 auto; }
+@media (min-width: 1024px) {
+  .jx-mapbox { height: auto; max-width: 960px; width: min(100%, calc((100svh - 96px) * ${MAP_W / MAP_H})); }
+}
 
 @keyframes jx-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes jx-kb   { from { transform: scale(1.08); } to { transform: scale(1); } }
@@ -101,7 +146,7 @@ const STYLES = `
 `;
 
 /* ------------------------------------------------------------ Media tile ----
-   Renders an image or a video from a DAY_MEDIA entry. Only an `active` video plays. */
+   Renders an image or a video from a STOP_MEDIA entry. Only an `active` video plays. */
 function StopMedia({ media, alt = '', active = false, eager = false, className = '' }) {
   const ref = useRef(null);
 
@@ -146,8 +191,8 @@ function StopMedia({ media, alt = '', active = false, eager = false, className =
    A fixed (non-moving) map of India. Only the route progress and the active marker change.
    It is see-through so the background shows behind it. */
 function RouteMap({ idx, onPick }) {
-  const stateIdx = DAY_STATE[idx] ?? 0;
-  const leg = DAY_LEG[idx] ?? 0;
+  const stateIdx = STOP_STATE[idx] ?? 0;
+  const leg = STOP_LEG[idx] ?? 0;
   const frac = CUM[leg] / TOTAL_LEN;
   const [cx, cy] = POINTS[stateIdx];
 
@@ -189,7 +234,7 @@ function RouteMap({ idx, onPick }) {
                 transition: 'fill .6s ease, stroke .6s ease, stroke-width .6s ease',
                 filter: current ? 'drop-shadow(0 0 8px rgba(245,165,36,0.6))' : 'none',
               }}
-              onClick={() => onPick(DAY_STATE.indexOf(i))}
+              onClick={() => onPick(STOP_STATE.indexOf(i))}
             >
               <title>{st.name}</title>
             </path>
@@ -242,12 +287,13 @@ function RouteMap({ idx, onPick }) {
 }
 
 /* ------------------------------------------------------------ Section ----
-   One full-screen page: the day's photo fills the screen, the map sits on the left and
-   the day's title + text on the right. No heading above it. */
+   One full-screen page, pinned while you scroll: the stop's photo fills the screen,
+   the map and the stop's title + text sit on top of it. Scrolling moves through the stops
+   on every screen size (phones included). */
 export default function InteractiveMap({ id = 'interactive-map', altId = 'itinerary' }) {
-  const total = FULL_ITINERARY.length;
+  const total = STOPS.length;
   const [idx, setIdx] = useState(0);
-  const [prev, setPrev] = useState(null); // the day fading out underneath
+  const [prev, setPrev] = useState(null); // the stop fading out underneath
   const [inView, setInView] = useState(false);
 
   const idxRef = useRef(0);
@@ -256,8 +302,7 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
   const auto = useRef(false);
   const touchX = useRef(null);
 
-  const item = FULL_ITINERARY[idx] || FULL_ITINERARY[0];
-  const m = MASTERS[item.day];
+  const stop = STOPS[idx] || STOPS[0];
 
   const goTo = useCallback((t) => {
     if (t === idxRef.current) return;
@@ -281,7 +326,7 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
   // Warm up the next / previous backgrounds so the change is instant
   useEffect(() => {
     [idx - 1, idx + 1].forEach((i) => {
-      const md = DAY_MEDIA[i];
+      const md = STOP_MEDIA[i];
       if (!md) return;
       const src = md.type === 'video' ? md.poster : md.src;
       if (src) {
@@ -291,37 +336,44 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
     });
   }, [idx]);
 
-  // Scrolling the page (on large screens) moves the journey forward while the section stays pinned
+  // How far the page can scroll while the stage stays pinned
+  const scrollDistance = () => {
+    const track = trackRef.current;
+    if (!track) return 0;
+    return track.getBoundingClientRect().height - (stageRef.current?.offsetHeight || window.innerHeight);
+  };
+
+  // Scrolling the page moves the journey forward while the section stays pinned (all screen sizes)
   useEffect(() => {
     const onScroll = () => {
-      if (!trackRef.current || auto.current || window.innerWidth < 1024) return;
-      const rect = trackRef.current.getBoundingClientRect();
-      const dist = rect.height - window.innerHeight;
+      if (!trackRef.current || auto.current) return;
+      const dist = scrollDistance();
       if (dist <= 0) return;
-      const p = -rect.top;
+      const p = -trackRef.current.getBoundingClientRect().top;
       if (p >= 0 && p <= dist) {
         goTo(Math.min(Math.floor((p / dist) * total), total - 1));
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, [goTo, total]);
 
-  // Jump to a day: on large screens scroll the page to that day's position, otherwise just switch
+  // Jump to a stop (tap on a state, or a sideways swipe): scroll the page to that stop's position
   const scrollToDay = useCallback(
     (t) => {
       if (t < 0 || t >= total) return;
       const track = trackRef.current;
-      if (!track || window.innerWidth < 1024) {
-        goTo(t);
-        return;
-      }
-      const rect = track.getBoundingClientRect();
-      const dist = rect.height - window.innerHeight;
       goTo(t);
+      if (!track) return;
+      const dist = scrollDistance();
       if (dist > 0) {
         auto.current = true;
-        const top = (window.scrollY || document.documentElement.scrollTop) + rect.top + (t / Math.max(total - 1, 1)) * dist + 10;
+        const top =
+          (window.scrollY || document.documentElement.scrollTop) +
+          track.getBoundingClientRect().top +
+          (t / Math.max(total - 1, 1)) * dist +
+          10;
         window.scrollTo({ top, behavior: 'smooth' });
         setTimeout(() => {
           auto.current = false;
@@ -349,63 +401,70 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
       <style>{STYLES}</style>
       <span id={altId} className="absolute top-0" aria-hidden="true" />
 
-      {/* The track gives the page room to scroll while the journey stays pinned (large screens) */}
-      <div ref={trackRef} className="relative lg:h-[var(--track-h)]" style={{ '--track-h': `${Math.max(total * 22, 160)}vh` }}>
+      {/* The track gives the page room to scroll while the journey stays pinned.
+          Phones get a little more scroll per stop, so each stop can be read. */}
+      <div
+        ref={trackRef}
+        className="relative h-[var(--track-m)] lg:h-[var(--track-h)]"
+        style={{ '--track-h': `${Math.max(total * 22, 160)}vh`, '--track-m': `${Math.max(total * 30, 220)}vh` }}
+      >
         <div
           ref={stageRef}
-          className="relative isolate min-h-[100svh] overflow-hidden bg-[#0B1622] text-white lg:sticky lg:top-0 lg:h-[100svh]"
+          className="sticky top-0 isolate h-[100svh] overflow-hidden bg-[#0B1622] text-white"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          {/* 1. Full-screen background for the day (image now, video later) */}
+          {/* 1. Full-screen background for the stop (image now, video later) */}
           <div className="absolute inset-0" style={{ zIndex: 0 }} aria-hidden="true">
             {prev !== null && prev !== idx && (
               <div key={`bg-${prev}`} className="jx-bg absolute inset-0">
-                <StopMedia media={DAY_MEDIA[prev]} className="h-full w-full object-cover" />
+                <StopMedia media={STOP_MEDIA[prev]} className="h-full w-full object-cover" />
               </div>
             )}
             <div key={`bg-${idx}`} className="jx-bg absolute inset-0">
-              <StopMedia media={DAY_MEDIA[idx]} active={inView} eager className="h-full w-full object-cover" />
+              <StopMedia media={STOP_MEDIA[idx]} active={inView} eager className="h-full w-full object-cover" />
             </div>
           </div>
 
           {/* 2. Shading so the map and text stay readable on any footage */}
           <div className="pointer-events-none absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true">
             <div className="absolute inset-0 bg-[#0B1622]/30" />
-            <div className="absolute inset-0 bg-gradient-to-l from-[#0B1622]/85 via-[#0B1622]/35 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-l from-[#0B1622]/85 via-[#0B1622]/35 to-transparent max-lg:hidden" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0B1622]/85 via-[#0B1622]/45 to-[#0B1622]/70 lg:hidden" />
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0B1622]/60 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0B1622]/75 to-transparent" />
           </div>
 
-          {/* 3. Map (left) + content (right). Top padding leaves room for the fixed header. */}
+          {/* 3. Phones: text on top, map fills the rest. Desktop: map (left) + text (right).
+                 Top padding leaves room for the fixed header. */}
           <div
-            className="relative mx-auto grid min-h-[100svh] max-w-[1440px] grid-cols-1 content-center gap-8 px-4 pb-10 pt-24 sm:px-8 lg:h-full lg:min-h-0 lg:grid-cols-12 lg:items-center lg:gap-6 lg:px-12 lg:pb-12 lg:pt-28"
+            className="relative mx-auto grid h-full max-w-[1440px] grid-cols-1 grid-rows-[auto_minmax(0,1fr)] gap-3 px-5 pb-8 pt-[76px] sm:px-8 lg:grid-cols-12 lg:grid-rows-none lg:items-center lg:gap-6 lg:px-12 lg:pb-3 lg:pt-[84px]"
             style={{ zIndex: 3 }}
           >
             {/* Map */}
-            <div className="order-2 flex items-center justify-center lg:order-1 lg:col-span-7 lg:h-full">
-              <div
-                className="mx-auto max-w-[560px] lg:max-w-[760px]"
-                style={{ aspectRatio: `${MAP_W} / ${MAP_H}`, width: `min(100%, calc((100svh - 170px) * ${MAP_W / MAP_H}))` }}
-              >
+            <div className="order-2 flex min-h-0 items-center justify-center lg:order-1 lg:col-span-7 lg:-ml-6 lg:h-full">
+              <div className="jx-mapbox">
                 <RouteMap idx={idx} onPick={(i) => scrollToDay(Math.max(i, 0))} />
               </div>
             </div>
 
             {/* Content: plain text on the background, no box */}
             <div className="order-1 flex min-w-0 flex-col lg:order-2 lg:col-span-5">
-              <div key={`txt-${item.day}`}>
-                <h3 className="jx-rise-2 jx-display mb-5 line-clamp-3 text-[clamp(2.2rem,4vw,4.1rem)] font-semibold uppercase leading-[0.98] tracking-tight text-white [text-shadow:0_4px_24px_rgba(0,0,0,0.45)]">
-                  {m?.title || item.institution}
+              <div key={`txt-${idx}`}>
+                <p className="jx-rise-2 mb-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-[#F5A524] lg:mb-3 lg:text-[14px]">
+                  {stop.place}
+                </p>
+                <h3 className="jx-rise-2 jx-display mb-2 line-clamp-2 text-[1.6rem] font-semibold uppercase leading-[1.02] tracking-tight text-white [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] sm:text-[2.1rem] lg:mb-5 lg:line-clamp-none lg:text-[clamp(2rem,3.4vw,3.6rem)]">
+                  {stop.title}
                 </h3>
 
-                <p className="jx-rise-3 line-clamp-5 max-w-lg text-[15px] font-light leading-relaxed text-white/85 lg:text-[17px]">
-                  {m?.headlineCopy || item.objective}
+                <p className="jx-rise-3 line-clamp-4 max-w-lg text-[13.5px] font-light leading-relaxed text-white/90 sm:text-[15px] lg:line-clamp-none lg:text-[17px]">
+                  {stop.text}
                 </p>
               </div>
 
               {/* Simple gold tracker: as wide as the text, fills up as the journey moves on (no numbers or text) */}
-              <div className="mt-8 h-[3px] w-full max-w-lg overflow-hidden rounded-full bg-white/20" aria-hidden="true">
+              <div className="mt-4 h-[3px] w-full max-w-lg overflow-hidden rounded-full bg-white/20 lg:mt-8" aria-hidden="true">
                 <div
                   className="h-full rounded-full bg-[#F5A524] transition-[width] duration-700 ease-out"
                   style={{ width: `${((idx + 1) / total) * 100}%`, boxShadow: '0 0 10px rgba(245,165,36,0.6)' }}
@@ -413,6 +472,13 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
               </div>
             </div>
           </div>
+
+          {/* Phones: a small hint on the first stop that scrolling moves the journey */}
+          {idx === 0 && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[4] text-center text-[11px] font-bold uppercase tracking-[0.3em] text-white/70 lg:hidden">
+              <span className="animate-pulse">Scroll to travel ↓</span>
+            </div>
+          )}
         </div>
       </div>
     </section>

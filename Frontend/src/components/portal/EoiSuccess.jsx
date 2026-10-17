@@ -19,7 +19,7 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
           <div className="w-16 h-16 rounded-full bg-white/10 text-[#C8DFDB] border-2 border-[#C8DFDB] flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h1 className="font-serif text-3xl sm:text-4xl font-bold">Expression of Interest Received</h1>
+          <h1 className="font-sans text-3xl sm:text-4xl font-bold">Expression of Interest Received</h1>
           <p className="text-sm sm:text-base text-white/85 leading-relaxed">
             Thank you, <strong>{data.fullName}</strong>. Your Expression of Interest for Dairy Yatra 2027 has been submitted.
           </p>
@@ -80,7 +80,7 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
         </div>
 
         <div className="bg-white rounded-2xl border border-[#C8DFDB] shadow-sm p-6 sm:p-8">
-          <h3 className="font-serif text-xl font-bold mb-2">Submitted Expression of Interest</h3>
+          <h3 className="font-sans text-xl font-bold mb-2">Submitted Expression of Interest</h3>
           <dl>
             <Row label="Name" value={data.fullName} />
             <Row label="Date of birth" value={data.dob ? `${data.dob}${data.age != null ? ` (${data.age} years)` : ''}` : ''} />

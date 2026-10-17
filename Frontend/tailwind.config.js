@@ -34,13 +34,15 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['"Playfair Display"', '"Cinzel"', '"Cormorant Garamond"', 'Georgia', 'serif'],
-        playfair: ['"Playfair Display"', 'Georgia', 'serif'],
-        cinzel: ['"Cinzel"', 'serif'],
+        // The site uses one sans-serif family. The old serif names now point to it,
+        // so any leftover font-serif / font-playfair class still renders in DM Sans.
+        serif: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        playfair: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        cinzel: ['"DM Sans"', 'system-ui', 'sans-serif'],
         sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
         display: ['"Big Shoulders Display"', '"Bebas Neue"', 'sans-serif'],
         condensed: ['"Bebas Neue"', '"Big Shoulders Display"', 'sans-serif'],
-        editorial: ['"Italiana"', '"Cormorant Garamond"', 'serif'],
+        editorial: ['"DM Sans"', 'system-ui', 'sans-serif'],
         syne: ['"Syne"', 'sans-serif'],
         script: ['"Caveat"', '"Alex Brush"', 'cursive'],
         handwriting: ['"Alex Brush"', '"Caveat"', 'cursive'],

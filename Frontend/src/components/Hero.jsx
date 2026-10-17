@@ -76,6 +76,11 @@ function PhotoPanel({ photos, seconds, reverse, paused, middle }) {
 
 /* Shows a logo trimmed to its visible drawing (see-through padding removed),
    so two logos with different amounts of empty space can be shown at the same visible size. */
+// Logos of different shapes look the same size when they cover the same area, not when they share a height.
+// Each logo's height is scaled by sqrt(LOGO_REF_RATIO / its width-to-height ratio), so wide ones get shorter
+// and compact ones taller. The base height comes from the CSS variable --logo-h set by the parent.
+const LOGO_REF_RATIO = 4;
+
 function TrimmedLogo({ src, alt, className = '' }) {
   const [crop, setCrop] = useState(null);
   const onLoad = (e) => {
@@ -110,7 +115,14 @@ function TrimmedLogo({ src, alt, className = '' }) {
     }
   };
   return (
-    <span className={`relative inline-block shrink-0 overflow-hidden ${className}`} style={crop ? { aspectRatio: String(crop.ratio) } : undefined}>
+    <span
+      className={`relative inline-block shrink-0 overflow-hidden ${className}`}
+      style={
+        crop
+          ? { aspectRatio: String(crop.ratio), height: `calc(var(--logo-h) * ${Math.sqrt(LOGO_REF_RATIO / crop.ratio).toFixed(3)})` }
+          : { height: 'var(--logo-h)' }
+      }
+    >
       <img
         src={src}
         alt={alt}
@@ -208,21 +220,17 @@ export default function Hero() {
       <style>{STYLES}</style>
 
       {/* Kumaraguru Institutions + Environmental Defense Fund, top-left (the menu sits top-right).
-          No background; the logos keep their own colours (see-through PNGs). */}
+          A frosted-glass panel sits behind them: it blurs the moving photos so the logos stay readable.
+          --logo-h is the base logo height; each logo is then scaled so both look the same size. */}
       <div
-        className="absolute left-[max(16px,2%)] top-3 z-20 flex items-center gap-4 transition-all duration-700 sm:gap-6 lg:top-4"
+        className="absolute left-[max(16px,2%)] top-3 z-20 transition-all duration-700 lg:top-4"
         style={{ opacity: showLogo ? 1 : 0, transform: showLogo ? 'translateY(0)' : 'translateY(-8px)' }}
       >
-        <TrimmedLogo
-          src={kiLogo}
-          alt="Kumaraguru Institutions"
-          className="h-7 [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.35))] sm:h-8 lg:h-9"
-        />
-        <TrimmedLogo
-          src={edfLogo}
-          alt="Environmental Defense Fund"
-          className="h-7 [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.35))] sm:h-8 lg:h-9"
-        />
+        <div className="flex items-center gap-3 rounded-xl border border-white/50 bg-white/60 px-3 py-2 shadow-[0_6px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl backdrop-saturate-150 [--logo-h:26px] sm:gap-4 sm:px-4 sm:[--logo-h:30px] lg:[--logo-h:34px]">
+          <TrimmedLogo src={kiLogo} alt="Kumaraguru Institutions" />
+          <span className="h-6 w-px bg-slate-500/40 sm:h-7" aria-hidden="true" />
+          <TrimmedLogo src={edfLogo} alt="Environmental Defense Fund" />
+        </div>
       </div>
 
       {/* 1. Background: three panels of photos running in a loop, blended into each other */}

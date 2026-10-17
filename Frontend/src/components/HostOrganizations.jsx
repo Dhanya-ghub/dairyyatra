@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-// Host
-import kiLogo from '../assets/kilg.png';
-// Supporters (put edf.png and abt.png in src/assets/logos/)
-import edfLogo from '../assets/logos/edf.png';
-import abtLogo from '../assets/logos/abt.png';
-// Partners
-import amulLogo from '../assets/logos/amul.svg';
-import banasLogo from '../assets/logos/banas.png';
-import akshayakalpaLogo from '../assets/logos/akshayakalpa.webp';
-import gokulLogo from '../assets/logos/gokul.png';
-import nrccLogo from '../assets/logos/nrcc.png';
+// Logos with their empty margins already cut off (src/assets/logos/trimmed/), so every logo can be sized the same
+import kiLogo from '../assets/logos/trimmed/ki.png';
+import edfLogo from '../assets/logos/trimmed/edf.png';
+import abtLogo from '../assets/logos/trimmed/abt.png';
+import amulLogo from '../assets/logos/trimmed/amul.png';
+import banasLogo from '../assets/logos/trimmed/banas.png';
+import akshayakalpaLogo from '../assets/logos/trimmed/akshayakalpa.png';
+import gokulLogo from '../assets/logos/trimmed/gokul.png';
+import nrccLogo from '../assets/logos/trimmed/nrcc.png';
+import nddbLogo from '../assets/logos/trimmed/nddb.png';
+import pdfaLogo from '../assets/logos/trimmed/pdfa.png';
+import icarLogo from '../assets/logos/trimmed/icar.png';
 
 /* Colours: same navy / cream family as the About section */
 const NAVY = '#14284B';
@@ -18,20 +19,30 @@ const PAPER = '#FBF9F4';
 const GOLD = '#C9A75E'; // the lines beside HOSTED BY / SUPPORTED BY / PARTNERS
 const BLUE = '#2B6CB0'; // the tier labels
 
-const HOST = { name: 'Kumaraguru Institutions', logo: kiLogo };
+/* url: clicking the logo opens this site in a new tab. Leave it out ('') and the logo is not a link. */
+const HOST = { name: 'Kumaraguru Institutions', logo: kiLogo, url: 'https://kumaraguru.in/' };
 
 const SUPPORTERS = [
-  { name: 'Environmental Defense Fund', logo: edfLogo },
-  { name: 'ABT Foods', logo: abtLogo },
+  { name: 'Environmental Defense Fund', logo: edfLogo, url: 'https://www.edf.org/' },
+  { name: 'ABT Foods', logo: abtLogo, url: '' },
 ];
 
 const PARTNERS = [
-  { name: 'Amul', logo: amulLogo },
-  { name: 'Banas Dairy', logo: banasLogo },
-  { name: 'Akshayakalpa', logo: akshayakalpaLogo },
-  { name: 'Gokul Dairy', logo: gokulLogo },
-  { name: 'ICAR – NRC on Camel', logo: nrccLogo },
+  { name: 'NDDB Dairy Services', logo: nddbLogo, url: 'https://www.nddb.coop/node/571' },
+  { name: 'Amul', logo: amulLogo, url: 'https://amul.com/' },
+  { name: 'Progressive Dairy Farmers Association (PDFA), Punjab', logo: pdfaLogo, url: 'https://pdfapunjab.com/' },
+  { name: 'ICAR – Central Institute for Research on Buffaloes, Hisar', logo: icarLogo, url: 'https://cirb.res.in/' },
+  { name: 'Banas Dairy', logo: banasLogo, url: 'https://www.banasdairy.coop/' },
+  { name: 'Akshayakalpa', logo: akshayakalpaLogo, url: 'https://akshayakalpa.org/' },
+  { name: 'Gokul Dairy', logo: gokulLogo, url: 'https://www.gokulmilk.coop/' },
+  { name: 'ICAR – National Research Centre on Camel', logo: nrccLogo, url: 'https://nrccamel.icar.gov.in/' },
 ];
+
+/* Every logo covers about the same area, whatever its shape: a wide logo gets shorter, a round one taller.
+   Height = --logo-u x sqrt(LOGO_REF / width-to-height ratio), capped at LOGO_MAX x --logo-u
+   so round badges do not tower over the rest. */
+const LOGO_REF = 2.2;
+const LOGO_MAX = 1.25;
 
 /* Height of the header once you have scrolled. On laptops and desktops the section fills one screen below it. */
 const HEADER_HEIGHT = '72px';
@@ -59,11 +70,29 @@ function Tier({ label, on, delay, className = '', children }) {
   );
 }
 
-/* One logo, in a fixed box so every logo in the top row has the same visual size */
+/* One logo, sized by its shape (see LOGO_REF), linking to the organisation's website */
 function Logo({ item }) {
-  return (
-    <div className="dy-ho-logo flex h-[var(--logo-h)] w-[var(--logo-w)] items-center justify-center" title={item.name}>
-      <img src={item.logo} alt={item.name} className="max-h-full max-w-full object-contain" draggable="false" />
+  const [ratio, setRatio] = useState(null);
+  const k = ratio ? Math.min(LOGO_MAX, Math.sqrt(LOGO_REF / ratio)) : 1;
+  const img = (
+    <img
+      src={item.logo}
+      alt={item.name}
+      onLoad={(e) => setRatio(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight || null)}
+      className="block w-auto max-w-full object-contain"
+      style={{ height: `calc(var(--logo-u) * ${k.toFixed(3)})` }}
+      loading="lazy"
+      draggable="false"
+    />
+  );
+  const box = 'dy-ho-logo flex h-[calc(var(--logo-u)*1.25)] w-full items-center justify-center';
+  return item.url ? (
+    <a href={item.url} target="_blank" rel="noopener noreferrer" title={`${item.name} (opens in a new tab)`} className={`${box} rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2B6CB0]`}>
+      {img}
+    </a>
+  ) : (
+    <div className={box} title={item.name}>
+      {img}
     </div>
   );
 }
@@ -72,6 +101,8 @@ export default function HostOrganizations() {
   const ref = useRef(null);
   const [on, setOn] = useState(false);
 
+  // Show the section once any part of it is on screen. The scroll / hashchange check is a backup
+  // for fast jumps (menu links, back button), so the content never stays hidden.
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
@@ -79,17 +110,34 @@ export default function HostOrganizations() {
       setOn(true);
       return undefined;
     }
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setOn(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
+    let io = null;
+    let timer = null;
+    const check = () => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) show();
+    };
+    const later = () => {
+      clearTimeout(timer);
+      timer = setTimeout(check, 450);
+    };
+    function show() {
+      setOn(true);
+      if (io) io.disconnect();
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('hashchange', later);
+      clearTimeout(timer);
+    }
+    io = new IntersectionObserver(([e]) => e.isIntersecting && show(), { threshold: 0, rootMargin: '0px 0px -8% 0px' });
     io.observe(el);
-    return () => io.disconnect();
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('hashchange', later);
+    check();
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('hashchange', later);
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
@@ -103,8 +151,7 @@ export default function HostOrganizations() {
         .dy-ho {
           scroll-margin-top: var(--hh);
           --row-gap: 40px; --lab-gap: 22px;
-          --logo-h: 76px; --logo-w: 200px;   /* host + supported-by logos: all the same box */
-          --par-h: 64px;                    /* partners: never taller than the logos above */
+          --logo-u: 46px;                   /* base logo size, used by every logo (see LOGO_REF) */
         }
         /* Laptops and desktops: one full screen, content centred and sized from the screen height
            so it fills the page without big empty bands */
@@ -115,9 +162,7 @@ export default function HostOrganizations() {
             padding-bottom: clamp(16px, 3vh, 40px);
             --row-gap: clamp(32px, 7.5vh, 88px);
             --lab-gap: clamp(18px, 4vh, 40px);
-            --logo-h: clamp(68px, 13vh, 124px);
-            --logo-w: clamp(160px, 18vw, 270px);
-            --par-h: clamp(60px, 11vh, 104px);
+            --logo-u: clamp(46px, 7.4vh, 72px);
           }
           .dy-ho-title { font-size: clamp(2.4rem, min(4.4vw, 7.4vh), 4.2rem) !important; }
         }
@@ -133,7 +178,7 @@ export default function HostOrganizations() {
         {/* ---------- Section heading ---------- */}
         <h2
           className={`dy-ho-in dy-ho-title text-center text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-[clamp(2.2rem,min(3.8vw,6.4vh),3.6rem)] ${on ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', color: NAVY }}
+          style={{ color: NAVY }}
         >
           Behind the Journey
         </h2>
@@ -141,13 +186,13 @@ export default function HostOrganizations() {
         {/* ---------- Row 1: Hosted by (left)   |   Supported by (right) ---------- */}
         <div className="grid items-start gap-10 md:grid-cols-[1fr_1.7fr] md:gap-x-12 lg:gap-x-20">
           <Tier label="Hosted by" on={on} delay={100}>
-            <div className="flex justify-center">
+            <div className="mx-auto max-w-[260px]">
               <Logo item={HOST} />
             </div>
           </Tier>
 
           <Tier label="Supported by" on={on} delay={350}>
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 lg:gap-x-16">
+            <div className="mx-auto grid max-w-[560px] grid-cols-2 items-center gap-x-10 gap-y-6 lg:gap-x-16">
               {SUPPORTERS.map((s) => (
                 <Logo key={s.name} item={s} />
               ))}
@@ -157,15 +202,9 @@ export default function HostOrganizations() {
 
         {/* ---------- Row 2: Partners ---------- */}
         <Tier label="Partners" on={on} delay={650}>
-          <div className="grid grid-cols-3 items-center justify-items-center gap-x-4 gap-y-6 sm:grid-cols-5 sm:gap-x-6 lg:gap-x-10">
+          <div className="grid grid-cols-2 items-center gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-x-8 lg:gap-x-12 lg:gap-y-[clamp(20px,4vh,44px)]">
             {PARTNERS.map((p) => (
-              <div
-                key={p.name}
-                className="dy-ho-logo flex h-[var(--par-h)] w-full items-center justify-center"
-                title={p.name}
-              >
-                <img src={p.logo} alt={p.name} className="max-h-full max-w-full object-contain" loading="lazy" draggable="false" />
-              </div>
+              <Logo key={p.name} item={p} />
             ))}
           </div>
         </Tier>

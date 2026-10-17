@@ -11,8 +11,8 @@ export default function BottomNav({ onOpenApply }) {
         {/* Quick Action Badges */}
         <div className="flex items-center gap-2 overflow-x-auto">
           <a
-            href="/Dairy_Yatra_2025_Brochure.pdf"
-            download="Dairy_Yatra_2025_Brochure.pdf"
+            href="/Dairy_Yatra_2027_Brochure.pdf"
+            download="Dairy_Yatra_2027_Brochure.pdf"
             className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-brand-gold text-xs font-bold px-3 py-2 rounded-xl border border-white/10 whitespace-nowrap transition-colors"
           >
             <Download className="w-3.5 h-3.5" /> PDF Brochure

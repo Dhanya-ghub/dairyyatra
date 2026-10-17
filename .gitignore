@@ -4,3 +4,10 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Database dumps contain applicants' personal data: never commit them
+backups/
+*.sql
+*.dump
+# ...except the schema that creates the table on a fresh database
+!db/init/*.sql

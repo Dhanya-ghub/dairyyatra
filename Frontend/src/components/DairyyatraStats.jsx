@@ -3,6 +3,12 @@ import ScrollAnimatedCounter from './ScrollAnimatedCounter';
 
 /* ---------- Font presets: change `fontPreset` prop (or the default) to switch ---------- */
 const FONT_PRESETS = {
+  dmsans: { // same sans-serif as the rest of the site
+    weight: 700,
+    num: "'DM Sans', system-ui, sans-serif",
+    label: "'DM Sans', system-ui, sans-serif",
+    url: 'family=DM+Sans:opsz,wght@9..40,500;9..40,600;9..40,700',
+  },
   bricolage: { // chunky, friendly numbers
     weight: 600,
     num: "'Bricolage Grotesque', system-ui, sans-serif",
@@ -29,19 +35,19 @@ const FONT_PRESETS = {
   },
 };
 
-/* ---------- Data: brochure-verified, ascending ---------- */
+/* ---------- Data, in the order shown ---------- */
 const STATS = [
-  { value: 5, label: 'States' },
   { value: 15, label: 'Days' },
-  { value: 15, label: 'Farms, institutions & businesses' },
+  { value: 7, label: 'States' },
   { value: 40, label: 'Fellows' },
-  { value: 150, label: 'Hours of learning' },
+  { value: 15, label: 'Farms, institutions & businesses' },
   { value: '6000+', unit: 'km', label: 'Journey across India' },
+  { value: 150, label: 'Hours of learning' },
 ];
 
 /* ---------- Section: single horizontal bar ---------- */
-export default function DairyYatraStats({ fontPreset = 'playfair' }) {
-  const f = FONT_PRESETS[fontPreset] || FONT_PRESETS.playfair;
+export default function DairyYatraStats({ fontPreset = 'dmsans' }) {
+  const f = FONT_PRESETS[fontPreset] || FONT_PRESETS.dmsans;
   const barRef = useRef(null);
   const [popped, setPopped] = useState(null);
 
@@ -73,10 +79,21 @@ export default function DairyYatraStats({ fontPreset = 'playfair' }) {
           border: 1px solid rgba(255, 255, 255, 0.16);
           backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
-        /* Small screens: keep one row and let it scroll sideways */
+        /* Tablets and phones: all six stats visible, in a 3 x 2 grid (no sideways scrolling) */
         @media (max-width: 899px) {
-          .dy-stats-bar { overflow-x: auto; scrollbar-width: none; padding: 28px 16px; }
-          .dy-stats-bar::-webkit-scrollbar { display: none; }
+          .dy-stats-bar {
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+            row-gap: 18px; padding: 20px 8px;
+          }
+          .dy-stat { min-width: 0; padding: 4px 6px; gap: 5px; }
+          .dy-stat + .dy-stat::before { display: none; }
+          .dy-stat:nth-child(3n + 2)::after, .dy-stat:nth-child(3n + 3)::after {
+            content: ''; position: absolute; left: 0; top: 12%; bottom: 12%; width: 1px;
+            background: rgba(255, 255, 255, 0.12);
+          }
+          .dy-num { font-size: 28px; min-width: 0; }
+          .dy-label { font-size: 12px; }
+          .dy-stat:hover, .dy-stat:active, .dy-stat:focus, .dy-stat.is-pop { transform: scale(1.06); }
         }
 
         .dy-stat {

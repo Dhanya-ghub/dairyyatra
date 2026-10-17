@@ -35,7 +35,7 @@ export default function AdminLogin({ onSuccess }) {
           <div className="w-14 h-14 rounded-2xl bg-[#142538] text-[#C8DFDB] flex items-center justify-center mx-auto">
             <Lock className="w-7 h-7" />
           </div>
-          <h1 className="font-serif text-3xl font-bold">Admin Login</h1>
+          <h1 className="font-sans text-3xl font-bold">Admin Login</h1>
           <p className="text-sm text-[#4E657D]">Dairy Yatra 2027 · Selection Panel</p>
         </div>
 

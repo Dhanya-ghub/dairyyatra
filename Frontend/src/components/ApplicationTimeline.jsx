@@ -131,7 +131,7 @@ export default function ApplicationTimeline() {
           io.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0, rootMargin: '0px 0px -15% 0px' }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -191,7 +191,7 @@ export default function ApplicationTimeline() {
             <h2 className="text-3xl font-bold leading-tight tracking-tight text-[#14284B] sm:text-4xl lg:text-[clamp(1.9rem,4.6vh,2.7rem)]">
               Application Timeline &amp; Process
             </h2>
-            <p className="dy-tl-sub mt-3 text-base text-[#4E657D] sm:text-lg lg:mt-2 lg:text-[clamp(14px,2vh,18px)]">Four phases, from the first announcement to the final day on the road.</p>
+            <p className="dy-tl-sub mt-3 text-base text-[#4E657D] sm:text-lg lg:mt-2 lg:text-[clamp(14px,2vh,18px)]">Four steps, from the first announcement to the final day on the road.</p>
           </div>
         </ScrollReveal>
 
@@ -240,7 +240,7 @@ export default function ApplicationTimeline() {
                       <span className="absolute -bottom-1 -left-[4px] h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" />
                       <div className="pt-5 lg:pt-[clamp(10px,2vh,20px)]">
                         <div className="mb-0.5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color }}>
-                          Phase {pad2(i + 1)}
+                          Step {i + 1}
                           {done && <span className="tracking-normal text-[#14284B]/40">· Done</span>}
                         </div>
                         <h3 className="mb-4 text-[22px] font-bold leading-tight lg:mb-[clamp(8px,1.6vh,16px)]" style={{ color: NAVY }}>
@@ -278,7 +278,7 @@ export default function ApplicationTimeline() {
                         {phase.period}
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color }}>
-                        Phase {pad2(i + 1)}
+                        Step {i + 1}
                         {done && <span className="tracking-normal text-[#14284B]/40">· Done</span>}
                       </div>
                       <h3 className="mb-3 text-[20px] font-bold leading-tight" style={{ color: NAVY }}>

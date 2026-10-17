@@ -137,8 +137,8 @@ export default function DayDetailsModal({ stop, isOpen, onClose, onOpenApply }) 
 
           <div className="flex items-center gap-3">
             <a
-              href="/Dairy_Yatra_2025_Brochure.pdf"
-              download="Dairy_Yatra_2025_Brochure.pdf"
+              href="/Dairy_Yatra_2027_Brochure.pdf"
+              download="Dairy_Yatra_2027_Brochure.pdf"
               className="text-xs font-bold text-[#3368A0] hover:underline px-3 py-2"
             >
               Download Brochure PDF

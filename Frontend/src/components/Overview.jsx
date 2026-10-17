@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Sprout, Handshake, FlaskConical, Tractor } from 'lucide-react';
+import { Factory, FlaskConical, Users, Telescope } from 'lucide-react';
 
 /* Colours: navy + off-white / cream only */
 const NAVY = '#14284B';
@@ -9,19 +9,28 @@ const PAPER = '#F4F2EE';
 // Logo in the centre of the Key Takeaways diagram (file lives in public/)
 const LOGO_URL = '/logo.png';
 
-/* Left side: the About text, exactly as given */
-const HIGHLIGHTS = [
-  { title: 'Meet farmers directly', text: 'Understand the everyday challenges of dairy farming first-hand.' },
-  { title: 'Visit working dairy businesses', text: 'From organic farms to cooperatives such as Amul and NDDB.' },
-  { title: 'Take home ideas that scale', text: 'Technology, management and sustainable practices that lift livelihoods.' },
+/* Left side: About text */
+const INTRO = [
+  "What will it take to transform India's dairy sector? The answers lie in its farms, people, enterprises, innovations, and communities.",
+  "Dairy Yatra is a 15-day immersive learning journey from Tamil Nadu to Rajasthan, bringing together 40 fellows to explore India's diverse dairy ecosystem. Through field visits and interactions with progressive farmers, entrepreneurs, researchers, industry leaders, and institutions, fellows discover the practices, innovations, and business models shaping the future of dairy.",
 ];
 
-/* Right side: Key Takeaways. `bold` is set heavy, `rest` light. */
+/* Left side: The Yatra Experience */
+const HIGHLIGHTS = [
+  { title: 'Learn by Seeing', text: 'Experience progressive dairy farms, explore scientific farming practices, and learn directly from those building successful dairy enterprises.' },
+  { title: 'Connect with Ideas', text: 'Discover dairy businesses, cooperatives, research institutions, emerging technologies, and innovative business models across the value chain.' },
+  { title: 'Aspire to Build', text: 'Turn field experiences into ideas for entrepreneurship, innovation, collaboration, and sustainable dairy livelihoods.' },
+];
+
+/* Closing line, under the Learnings diagram */
+const CLOSING = 'See the Sector. Meet Its Changemakers. Discover Your Place in the Future of Dairy.';
+
+/* Right side: Learnings from the Yatra. `bold` is set heavy, `rest` light; `text` shows as a tooltip. */
 const TAKEAWAYS = [
-  { Icon: Sprout, bold: 'Learning', rest: 'in the field' },
-  { Icon: Handshake, bold: 'Networking', rest: '' },
-  { Icon: FlaskConical, bold: 'Scientific', rest: 'practices' },
-  { Icon: Tractor, bold: 'Machinery', rest: 'adoption' },
+  { Icon: Factory, bold: 'Industry', rest: 'insights', text: "Understand India's diverse dairy ecosystem and discover emerging opportunities." },
+  { Icon: FlaskConical, bold: 'Scientific', rest: 'practices', text: 'Explore scientific dairy farming methods, technologies, and innovative enterprise models.' },
+  { Icon: Users, bold: 'Community', rest: 'connections', text: 'Build meaningful networks with farmers, entrepreneurs, industry experts, and fellow fellows.' },
+  { Icon: Telescope, bold: 'A vision', rest: 'for the future', text: 'Identify career pathways, entrepreneurial opportunities, and actionable ideas for dairy and rural development.' },
 ];
 
 /* ---------- Diagram geometry (SVG units; the panel is 100 wide x 90 tall) ----------
@@ -68,7 +77,7 @@ const ARC = (() => {
 const pctX = (x) => `${(x / VB_W) * 100}%`;
 const pctY = (y) => `${(y / VB_H) * 100}%`;
 
-const serif = { fontFamily: '"Playfair Display", Georgia, serif' };
+const serif = {}; // headings use the site's sans-serif (DM Sans)
 
 /* Height of the header once you've scrolled (the section fits in the screen below it) */
 const HEADER_HEIGHT = '72px';
@@ -77,6 +86,8 @@ export default function Overview() {
   const ref = useRef(null);
   const [on, setOn] = useState(false);
 
+  // Show the section once any part of it is on screen. The scroll / hashchange check is a backup
+  // for fast jumps (menu links, back button), so the content never stays hidden.
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
@@ -84,17 +95,34 @@ export default function Overview() {
       setOn(true);
       return undefined;
     }
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setOn(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
+    let io = null;
+    let timer = null;
+    const check = () => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) show();
+    };
+    const later = () => {
+      clearTimeout(timer);
+      timer = setTimeout(check, 450);
+    };
+    function show() {
+      setOn(true);
+      if (io) io.disconnect();
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('hashchange', later);
+      clearTimeout(timer);
+    }
+    io = new IntersectionObserver(([e]) => e.isIntersecting && show(), { threshold: 0, rootMargin: '0px 0px -8% 0px' });
     io.observe(el);
-    return () => io.disconnect();
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('hashchange', later);
+    check();
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('hashchange', later);
+      clearTimeout(timer);
+    };
   }, []);
 
   const delay = (ms) => ({ transitionDelay: on ? `${ms}ms` : '0ms' });
@@ -130,10 +158,10 @@ export default function Overview() {
         /* Takeaway labels scale with the panel */
         .dy-lab  { font-size: clamp(11px, 3.2vw, 19px); }
         @media (min-width: 1024px) {
-          .dy-h2   { font-size: clamp(2.3rem, min(3.9vw, 6.6vh), 4rem); }
-          .dy-p    { font-size: clamp(1rem, min(1.35vw, 2.35vh), 1.3rem); }
-          .dy-hl-t { font-size: clamp(1.02rem, min(1.5vw, 2.6vh), 1.45rem); }
-          .dy-hl-p { font-size: clamp(.9rem, min(1.2vw, 2.1vh), 1.12rem); }
+          .dy-h2   { font-size: clamp(2.1rem, min(3.2vw, 5.2vh), 3.5rem); }
+          .dy-p    { font-size: clamp(.95rem, min(1.2vw, 2.05vh), 1.2rem); line-height: 1.6; }
+          .dy-hl-t { font-size: clamp(1rem, min(1.4vw, 2.4vh), 1.35rem); }
+          .dy-hl-p { font-size: clamp(.86rem, min(1.08vw, 1.9vh), 1.05rem); }
           .dy-lab  { font-size: clamp(12px, min(1.3vw, 2.3vh), 20px); }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -141,34 +169,39 @@ export default function Overview() {
         }
       `}</style>
 
-      <div className="mx-auto grid w-full max-w-[1500px] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-[clamp(16px,2.5vw,40px)] lg:pl-[clamp(24px,4vw,72px)] lg:pr-[clamp(12px,1.5vw,28px)]">
+      <div
+        className="grid w-full items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-[clamp(24px,3.5vw,64px)]"
+        style={{ paddingLeft: 'max(16px, 2%)', paddingRight: 'max(16px, 2%)' }}
+      >
         {/* ============ Left: About (unchanged) ============ */}
         <div className="min-w-0">
-          <div
-            className={`dy-in mb-5 flex items-center gap-3 text-[12px] font-bold uppercase tracking-[0.3em] lg:text-[13px] ${on ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
-            style={{ color: NAVY_LIGHT }}
-          >
-            <span className="h-px w-12" style={{ backgroundColor: NAVY_LIGHT }} />
-            About the Yatra
-          </div>
 
           <h2
             className={`dy-in dy-h2 font-semibold leading-[1.1] tracking-[-0.01em] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
             style={{ ...serif, ...delay(80) }}
           >
-            Beyond the farm: uniting 40 visionary entrepreneurs
+            Explore India's Dairy Landscape. Experience Its Possibilities.
           </h2>
 
-          <p
-            className={`dy-in dy-p mt-6 max-w-[42rem] leading-[1.7] lg:mt-[clamp(14px,2.6vh,28px)] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
-            style={{ ...delay(180), color: '#3E4E68' }}
-          >
-            Dairy Yatra is a 15-day journey that takes 40 entrepreneurs across five states of India to explore the
-            dairy sector up close. Together they meet farmers, see dairy businesses at work, and look for ideas
-            that can improve productivity and profitability across the country.
-          </p>
+          {INTRO.map((text, i) => (
+            <p
+              key={i}
+              className={`dy-in dy-p max-w-[48rem] leading-[1.7] ${i === 0 ? 'mt-6 lg:mt-[clamp(14px,2.6vh,28px)]' : 'mt-3 lg:mt-[clamp(6px,1.2vh,14px)]'} ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+              style={{ ...delay(180 + i * 60), color: '#3E4E68' }}
+            >
+              {text}
+            </p>
+          ))}
 
-          <ul className="mt-10 flex flex-col gap-6 lg:mt-[clamp(18px,3.4vh,40px)] lg:gap-[clamp(12px,2.6vh,28px)]">
+          <div
+            className={`dy-in mt-10 flex items-center gap-3 text-[12px] font-bold uppercase tracking-[0.3em] lg:text-[13px] lg:mt-[clamp(16px,3vh,36px)] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+            style={{ ...delay(280), color: NAVY_LIGHT }}
+          >
+            <span className="h-px w-12" style={{ backgroundColor: NAVY_LIGHT }} />
+            The Yatra Experience
+          </div>
+
+          <ul className="mt-5 flex flex-col gap-6 lg:mt-[clamp(10px,2vh,22px)] lg:gap-[clamp(10px,2.2vh,24px)]">
             {HIGHLIGHTS.map((h, i) => (
               <li
                 key={h.title}
@@ -187,11 +220,11 @@ export default function Overview() {
           </ul>
         </div>
 
-        {/* ============ Right: logo + curved line + connected takeaways ============ */}
-        <div className="min-w-0">
+        {/* ============ Right: logo + curved line + connected learnings ============ */}
+        <div className="flex min-w-0 flex-col">
           <div
             className="relative mx-auto w-full lg:ml-auto lg:mr-0"
-            style={{ aspectRatio: `${VB_W} / ${VB_H}`, maxWidth: `min(100%, calc((100svh - 110px) * ${VB_W / VB_H}))` }}
+            style={{ aspectRatio: `${VB_W} / ${VB_H}`, maxWidth: `min(100%, calc((100svh - 190px) * ${VB_W / VB_H}))` }}
           >
             <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${VB_W} ${VB_H}`} aria-hidden="true">
               <defs>
@@ -276,6 +309,7 @@ export default function Overview() {
               return (
                 <div
                   key={it.bold}
+                  title={it.text}
                   className="dy-tk dy-lab absolute z-10 flex items-center gap-[0.7em]"
                   style={{
                     ...delay(1050 + i * 170),
@@ -304,6 +338,13 @@ export default function Overview() {
               );
             })}
           </div>
+
+          <p
+            className={`dy-in mx-auto mt-4 max-w-[24em] text-center font-semibold leading-snug [text-wrap:balance] ${on ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
+            style={{ ...serif, ...delay(1600), color: NAVY, fontSize: 'clamp(1.05rem, min(1.5vw, 2.6vh), 1.4rem)' }}
+          >
+            {CLOSING}
+          </p>
         </div>
       </div>
     </section>

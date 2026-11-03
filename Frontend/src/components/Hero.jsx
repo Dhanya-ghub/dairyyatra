@@ -301,7 +301,7 @@ export default function Hero() {
               </div>
 
               {/* 2027, below the logo */}
-              <div className="mt-[5%] flex items-center gap-[0.6em] text-[clamp(14px,1.55vw,24px)] font-extrabold leading-none tracking-[0.3em] text-[#1C1C1C]">
+              <div className="mt-[5%] flex items-center gap-[0.6em] text-[clamp(14px,1.55vw,24px)] font-extrabold leading-none tracking-[0.3em] text-[#0B1F44]">
                 <span className="h-[2px] w-[1.6em] rounded-full bg-[#C9A75E]" aria-hidden="true" />
                 <span className="-mr-[0.3em]">2027</span>
                 <span className="h-[2px] w-[1.6em] rounded-full bg-[#C9A75E]" aria-hidden="true" />

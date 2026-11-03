@@ -47,7 +47,7 @@ export default function App({ page = 'home' }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-textDark font-sans selection:bg-brand-terracotta selection:text-white">
+    <div className="min-h-screen bg-white text-brand-textDark font-sans selection:bg-[#2B6CB0] selection:text-white">
       {/* Cinematic Full-Screen Video Preloader (home page only) */}
       {showIntro && <CinematicPreloader />}
 

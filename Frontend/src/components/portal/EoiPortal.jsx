@@ -153,7 +153,7 @@ export default function EoiPortal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#F2EFE7] text-[#172738] overflow-y-auto min-h-screen flex flex-col font-sans">
+    <div className="fixed inset-0 z-50 bg-[#F5F8FC] text-[#172738] overflow-y-auto min-h-screen flex flex-col font-sans">
       <EoiHeader
         currentStep={currentStep}
         totalSteps={TOTAL_STEPS}
@@ -205,7 +205,7 @@ export default function EoiPortal({ isOpen, onClose }) {
                   <button
                     type="button"
                     onClick={goPrev}
-                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm bg-[#F2EFE7] border border-[#C8DFDB] hover:bg-[#E5E1D5] w-full sm:w-auto active:scale-95 cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm bg-[#F5F8FC] border border-[#C8DFDB] hover:bg-[#E3ECF7] w-full sm:w-auto active:scale-95 cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4 text-[#3368A0]" /> Previous
                   </button>

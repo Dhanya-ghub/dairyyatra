@@ -9,7 +9,7 @@ const phases = [
     Icon: Megaphone,
     period: 'Oct – Nov 2026',
     milestones: [
-      { date: '10 October 2026', dateTime: '2026-10-10', title: 'Announcement' },
+      { date: '17 October 2026', dateTime: '2026-10-17', title: 'Announcement' },
       { date: '12 October 2026', dateTime: '2026-10-12', title: 'Expression of Interest (EOI) Opens' },
       { date: '12 November 2026', dateTime: '2026-11-12', title: 'EOI Closes' },
     ],

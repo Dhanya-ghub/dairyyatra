@@ -43,11 +43,11 @@ const ALUMNI = [
     ],
   },
   {
-    name: 'Ms Santhra',
-    role: 'CEO, Pariyur FPO',
+    name: 'Ms Shantra',
+    role: 'Chief Executive Officer, Pariyur Farmer Producer Organisation',
     photo: 'santhra.jpg',
     quote: [
-      'Dairy Yathra was a truly enriching experience that broadened my perspective, introduced me to new learning opportunities, and connected me with like-minded and inspiring people from across the dairy sector. It has also helped me learn a lot from pioneering industries and, in turn, give back to my farming community.',
+      'Dairy Yatra was a truly enriching experience that broadened my perspective, introduced me to new learning opportunities, and connected me with like-minded and inspiring people from across the dairy sector. It has also helped me learn a lot from pioneering industries and, in turn, give back to my farming community.',
     ],
   },
   {
@@ -60,7 +60,7 @@ const ALUMNI = [
   },
   {
     name: 'Mr Ragotham',
-    role: 'Student, KCT-BS (Agri)',
+    role: 'Student, KCT Business School – Agriculture',
     photo: 'ragotham.jpg',
     quote: [
       'Dairy Yatra was a wonderful learning experience that gave me the opportunity to explore dairy farming, processing, cooperatives, and entrepreneurship across 7 states. It helped me understand how the dairy sector works on the ground, interact with people from different backgrounds, and gain a better understanding of the challenges and opportunities in the sector.',
@@ -303,7 +303,7 @@ export default function AlumniSection({ id = 'alumni' }) {
       <ScrollReveal animation="fade-up" delay={100} duration={700}>
         <div className="dy-al-wrap">
           <h2 className="dy-al-title">
-            <span className="dy-al-title-a">Our</span> <span className="dy-al-title-b">Alumni</span>
+            <span className="dy-al-title-a">Our</span> <span className="dy-al-title-b">Fellows</span>
           </h2>
 
           <ul className="dy-al-list">

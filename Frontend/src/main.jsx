@@ -6,7 +6,8 @@ import './index.css'
 const AdminPortal = lazy(() => import('./components/admin/Adminportal'))
 
 // Pages of the site. Anything not listed is the home page.
-const PAGES = { '/programme': 'programme', '/programme/fee': 'fee' }
+// Programme Fee is hidden for now: add  '/programme/fee': 'fee'  back here (and in the Header menu) to show it again.
+const PAGES = { '/programme': 'programme' }
 const pageFor = (pathname) => PAGES[pathname.replace(/\/+$/, '')] || 'home'
 
 /* Moving between the site's pages without reloading:

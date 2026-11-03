@@ -66,7 +66,7 @@ function RefundPolicy() {
               <defs>
                 <linearGradient id="dyRefund" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#5B9BE0" />
-                  <stop offset="100%" stopColor="#F5A524" />
+                  <stop offset="100%" stopColor="#D9B45A" />
                 </linearGradient>
               </defs>
             </svg>
@@ -81,7 +81,7 @@ function RefundPolicy() {
             <p className="mt-0.5 text-lg font-semibold">{r.period}</p>
             <p className="mt-3 text-sm text-white/75">
               On the full fee of {inr(TOTAL_FEE)}:{' '}
-              <span className="font-semibold text-[#F5A524]">{inr((TOTAL_FEE * r.refund) / 100)}</span> refunded
+              <span className="font-semibold text-[#D9B45A]">{inr((TOTAL_FEE * r.refund) / 100)}</span> refunded
             </p>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function ProgrammeFee({ onOpenApply }) {
         {/* Heading row: title on the left, total fee on the right */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#2B6CB0]">Dairy Yathra · Financial policy</p>
+            <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#2B6CB0]">Dairy Yatra · Financial policy</p>
             <h1 className="mt-2 text-[clamp(1.9rem,3.4vw,2.6rem)] font-semibold leading-tight tracking-tight">Programme Fee</h1>
           </div>
           <div className="inline-flex items-center gap-2 self-start rounded-full bg-slate-100 p-1 pr-4 text-sm sm:self-auto">
@@ -157,7 +157,7 @@ export default function ProgrammeFee({ onOpenApply }) {
               aria-hidden="true"
               style={{
                 background:
-                  'radial-gradient(120% 70% at 75% 110%, rgba(245,165,36,0.85), transparent 60%), radial-gradient(90% 60% at 20% 95%, rgba(43,108,176,0.75), transparent 65%)',
+                  'radial-gradient(120% 70% at 75% 110%, rgba(217,180,90,0.85), transparent 60%), radial-gradient(90% 60% at 20% 95%, rgba(43,108,176,0.75), transparent 65%)',
               }}
             />
             <p className="text-[13px] text-white/70">Full programme fee</p>

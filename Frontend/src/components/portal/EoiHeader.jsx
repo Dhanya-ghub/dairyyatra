@@ -12,7 +12,7 @@ export default function EoiHeader({ currentStep, totalSteps = 2, onClose, isDraf
         <div className="flex h-[76px] items-center justify-between gap-4">
           {/* Brand: round logo badge (like the landing page) + title */}
           <div className="flex min-w-0 items-center gap-4">
-            <span className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full bg-[#F7F1E3] p-[7px] shadow-[0_6px_18px_rgba(0,0,0,0.35)] ring-2 ring-[#E3C98F]">
+            <span className="flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full bg-[#FFFFFF] p-[7px] shadow-[0_6px_18px_rgba(0,0,0,0.35)] ring-2 ring-[#E3C98F]">
               <img src={LOGO_URL} alt="Dairy Yatra" className="h-full w-full object-contain" draggable="false" />
             </span>
 

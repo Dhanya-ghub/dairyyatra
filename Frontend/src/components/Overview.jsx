@@ -1,17 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Factory, FlaskConical, Users, Telescope } from 'lucide-react';
 
-/* Colours: navy + off-white / cream only */
+/* Colours: the site's white / blue / gold */
 const NAVY = '#14284B';
 const NAVY_LIGHT = '#3368A0';
-const PAPER = '#F4F2EE';
+const PAPER = '#FFFFFF';
+const GOLD_DEEP = '#A67C1A'; // on white (dark enough to read)
 
 // Logo in the centre of the Key Takeaways diagram (file lives in public/)
 const LOGO_URL = '/logo.png';
 
-/* Left side: About text */
+/* Left side: About text. QUESTION is set bold in gold so it stands out. */
+const QUESTION = "What will it take to transform India's dairy sector?";
 const INTRO = [
-  "What will it take to transform India's dairy sector? The answers lie in its farms, people, enterprises, innovations, and communities.",
+  'The answers lie in its farms, people, enterprises, innovations, and communities.',
   "Dairy Yatra is a 15-day immersive learning journey from Tamil Nadu to Rajasthan, bringing together 40 fellows to explore India's diverse dairy ecosystem. Through field visits and interactions with progressive farmers, entrepreneurs, researchers, industry leaders, and institutions, fellows discover the practices, innovations, and business models shaping the future of dairy.",
 ];
 
@@ -23,7 +25,8 @@ const HIGHLIGHTS = [
 ];
 
 /* Closing line, under the Learnings diagram */
-const CLOSING = 'See the Sector. Meet Its Changemakers. Discover Your Place in the Future of Dairy.';
+const CLOSING = ['See the Sector.', 'Meet Its Changemakers.'];
+const CLOSING_LAST = 'Discover Your Place in the Future of Dairy.';
 
 /* Right side: Learnings from the Yatra. `bold` is set heavy, `rest` light; `text` shows as a tooltip. */
 const TAKEAWAYS = [
@@ -151,6 +154,10 @@ export default function Overview() {
         .dy-chip { transition: transform 300ms ease, box-shadow 300ms ease; }
 
         /* Bigger type on the left */
+        .dy-eyebrow { font-size: 13px; }
+        /* closing lines: as large as the column allows */
+        .dy-close     { font-size: clamp(1.7rem, 7.2vw, 2.8rem); }
+        .dy-close-sub { font-size: clamp(1rem, 3.6vw, 1.3rem); }
         .dy-h2   { font-size: clamp(2.1rem, 6vw, 3.2rem); }
         .dy-p    { font-size: clamp(1rem, 2.4vw, 1.15rem); }
         .dy-hl-t { font-size: 1.2rem; }
@@ -158,6 +165,9 @@ export default function Overview() {
         /* Takeaway labels scale with the panel */
         .dy-lab  { font-size: clamp(11px, 3.2vw, 19px); }
         @media (min-width: 1024px) {
+          .dy-eyebrow { font-size: clamp(13px, min(1.05vw, 1.9vh), 16px); }
+          .dy-close     { font-size: clamp(1.8rem, min(3.1vw, 5vh), 3.4rem); }
+          .dy-close-sub { font-size: clamp(1rem, min(1.35vw, 2.3vh), 1.45rem); }
           .dy-h2   { font-size: clamp(2.1rem, min(3.2vw, 5.2vh), 3.5rem); }
           .dy-p    { font-size: clamp(.95rem, min(1.2vw, 2.05vh), 1.2rem); line-height: 1.6; }
           .dy-hl-t { font-size: clamp(1rem, min(1.4vw, 2.4vh), 1.35rem); }
@@ -176,8 +186,17 @@ export default function Overview() {
         {/* ============ Left: About (unchanged) ============ */}
         <div className="min-w-0">
 
+          {/* small label above the heading: gold rule + spaced capitals, like "The Yatra Experience" below */}
+          <p
+            className={`dy-in dy-eyebrow flex items-center gap-3 font-bold uppercase tracking-[0.3em] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+            style={{ ...delay(40), color: NAVY_LIGHT }}
+          >
+            <span className="h-[2px] w-10 rounded-full" style={{ backgroundColor: GOLD_DEEP }} aria-hidden="true" />
+            About Dairy Yatra
+          </p>
+
           <h2
-            className={`dy-in dy-h2 font-semibold leading-[1.1] tracking-[-0.01em] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+            className={`dy-in dy-h2 mt-4 font-semibold leading-[1.1] tracking-[-0.01em] ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
             style={{ ...serif, ...delay(80) }}
           >
             Explore India's Dairy Landscape. Experience Its Possibilities.
@@ -189,6 +208,11 @@ export default function Overview() {
               className={`dy-in dy-p max-w-[48rem] leading-[1.7] ${i === 0 ? 'mt-6 lg:mt-[clamp(14px,2.6vh,28px)]' : 'mt-3 lg:mt-[clamp(6px,1.2vh,14px)]'} ${on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
               style={{ ...delay(180 + i * 60), color: '#3E4E68' }}
             >
+              {i === 0 && (
+                <strong className="mb-2 block font-extrabold leading-snug" style={{ color: GOLD_DEEP, fontSize: '1.2em' }}>
+                  {QUESTION}
+                </strong>
+              )}
               {text}
             </p>
           ))}
@@ -224,7 +248,7 @@ export default function Overview() {
         <div className="flex min-w-0 flex-col">
           <div
             className="relative mx-auto w-full lg:ml-auto lg:mr-0"
-            style={{ aspectRatio: `${VB_W} / ${VB_H}`, maxWidth: `min(100%, calc((100svh - 190px) * ${VB_W / VB_H}))` }}
+            style={{ aspectRatio: `${VB_W} / ${VB_H}`, maxWidth: `min(100%, calc((100svh - 300px) * ${VB_W / VB_H}))` }}
           >
             <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${VB_W} ${VB_H}`} aria-hidden="true">
               <defs>
@@ -339,12 +363,30 @@ export default function Overview() {
             })}
           </div>
 
-          <p
-            className={`dy-in mx-auto mt-4 max-w-[24em] text-center font-semibold leading-snug [text-wrap:balance] ${on ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
-            style={{ ...serif, ...delay(1600), color: NAVY, fontSize: 'clamp(1.05rem, min(1.5vw, 2.6vh), 1.4rem)' }}
+          {/* closing lines, no box, across the full width of the column:
+              "See the Sector." in navy and "Meet Its Changemakers." in a gold sheen, one per line,
+              then the invitation between two gold rules */}
+          <div
+            className={`dy-in mt-6 w-full text-center lg:mt-[clamp(10px,2.2vh,28px)] ${on ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
+            style={delay(1600)}
           >
-            {CLOSING}
-          </p>
+            <p className="dy-close font-extrabold uppercase leading-[1.08] tracking-[0.01em]">
+              <span className="block" style={{ color: NAVY }}>{CLOSING[0]}</span>
+              <span
+                className="block bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(100deg, #8C6A14 0%, ${GOLD_DEEP} 35%, #C9A13F 55%, #8C6A14 100%)` }}
+              >
+                {CLOSING[1]}
+              </span>
+            </p>
+            <div className="mt-[0.9em] flex items-center gap-4 dy-close-sub">
+              <span className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(to right, transparent, ${GOLD_DEEP})` }} aria-hidden="true" />
+              <p className="font-semibold leading-snug [text-wrap:balance]" style={{ color: NAVY_LIGHT }}>
+                {CLOSING_LAST}
+              </p>
+              <span className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(to left, transparent, ${GOLD_DEEP})` }} aria-hidden="true" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

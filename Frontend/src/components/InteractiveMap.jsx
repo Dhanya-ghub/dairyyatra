@@ -23,7 +23,7 @@ const STOPS = [
   {
     place: 'Coimbatore, Tamil Nadu',
     title: 'Journey Begins',
-    text: 'Kumaraguru Institutions sets the stage for Dairy Yathra by igniting the vision and setting the stage for a transformative dairy learning journey.',
+    text: 'Kumaraguru Institutions sets the stage for Dairy Yatra by igniting the vision and setting the stage for a transformative dairy learning journey.',
     state: 'TN',
     media: { type: 'image', src: day1Image },
   },
@@ -85,8 +85,8 @@ const STOPS = [
   },
   {
     place: 'Coimbatore, Tamil Nadu',
-    title: 'Journey Concludes',
-    text: 'The journey concludes with practical insights, institutional connections, and actionable ideas to strengthen dairy entrepreneurship, improve farm-level practices, and advance farmer livelihoods.',
+    title: 'Journey Continues',
+    text: 'The journey continues with practical insights, institutional connections, and actionable ideas to strengthen dairy entrepreneurship, improve farm-level practices, and advance farmer livelihoods.',
     state: 'TN',
     media: { type: 'image', src: farmersImage },
   },
@@ -214,7 +214,7 @@ function RouteMap({ idx, onPick }) {
     >
       <g style={{ pointerEvents: 'auto' }}>
         {/* Country: a translucent glass fill so the background shows through */}
-        <path d={OUTLINE_D} fill="rgba(244,239,230,0.10)" stroke="none" style={{ filter: 'drop-shadow(0 10px 22px rgba(0,0,0,0.35))' }} />
+        <path d={OUTLINE_D} fill="rgba(255,255,255,0.10)" stroke="none" style={{ filter: 'drop-shadow(0 10px 22px rgba(0,0,0,0.35))' }} />
         <path d={BORDERS_D} fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.32)" strokeWidth="0.6" strokeLinejoin="round" />
 
         {/* The route states: upcoming = faint gold, visited = gold, current = bright gold */}
@@ -225,14 +225,14 @@ function RouteMap({ idx, onPick }) {
             <path
               key={ROUTE_ORDER[i]}
               d={st.d}
-              fill={current ? 'rgba(245,165,36,0.62)' : visited ? 'rgba(245,165,36,0.34)' : 'rgba(245,165,36,0.12)'}
-              stroke={current ? '#F5A524' : 'rgba(245,165,36,0.45)'}
+              fill={current ? 'rgba(217,180,90,0.62)' : visited ? 'rgba(217,180,90,0.34)' : 'rgba(217,180,90,0.12)'}
+              stroke={current ? '#D9B45A' : 'rgba(217,180,90,0.45)'}
               strokeWidth={current ? 1.6 : 0.8}
               strokeLinejoin="round"
               style={{
                 cursor: 'pointer',
                 transition: 'fill .6s ease, stroke .6s ease, stroke-width .6s ease',
-                filter: current ? 'drop-shadow(0 0 8px rgba(245,165,36,0.6))' : 'none',
+                filter: current ? 'drop-shadow(0 0 8px rgba(217,180,90,0.6))' : 'none',
               }}
               onClick={() => onPick(STOP_STATE.indexOf(i))}
             >
@@ -241,7 +241,7 @@ function RouteMap({ idx, onPick }) {
           );
         })}
 
-        <path d={OUTLINE_D} fill="none" stroke="rgba(255,248,235,0.9)" strokeWidth="1.3" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.55))', pointerEvents: 'none' }} />
+        <path d={OUTLINE_D} fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.3" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.55))', pointerEvents: 'none' }} />
 
         {/* Traversal: dashed full route between the states + the gold part travelled so far */}
         <g style={{ pointerEvents: 'none' }}>
@@ -251,12 +251,12 @@ function RouteMap({ idx, onPick }) {
             d={ROUTE_D}
             pathLength="1"
             fill="none"
-            stroke="#F5A524"
+            stroke="#D9B45A"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeDasharray={`${frac} 1.01`}
-            style={{ filter: 'drop-shadow(0 0 3px rgba(245,165,36,0.75))' }}
+            style={{ filter: 'drop-shadow(0 0 3px rgba(217,180,90,0.75))' }}
           />
 
           {POINTS.map(([x, y], i) => (
@@ -265,17 +265,17 @@ function RouteMap({ idx, onPick }) {
               cx={x}
               cy={y}
               r="4"
-              fill={i <= leg ? '#F5A524' : 'rgba(255,255,255,0.85)'}
+              fill={i <= leg ? '#D9B45A' : 'rgba(255,255,255,0.85)'}
               stroke={i <= leg ? '#fff' : 'rgba(23,39,56,0.8)'}
               strokeWidth="1.4"
             />
           ))}
 
           {/* Current state */}
-          <circle className="jx-pulse" cx={cx} cy={cy} r="6" fill="#F5A524" />
-          <circle cx={cx} cy={cy} r="6.5" fill="#F5A524" stroke="#fff" strokeWidth="1.6" style={{ filter: 'drop-shadow(0 0 5px rgba(245,165,36,0.95))' }} />
+          <circle className="jx-pulse" cx={cx} cy={cy} r="6" fill="#D9B45A" />
+          <circle cx={cx} cy={cy} r="6.5" fill="#D9B45A" stroke="#fff" strokeWidth="1.6" style={{ filter: 'drop-shadow(0 0 5px rgba(217,180,90,0.95))' }} />
           <g transform={`translate(${left ? cx - gap - lw : cx + gap} ${cy - lh / 2})`}>
-            <rect width={lw} height={lh} rx={7} fill="rgba(11,22,34,0.88)" stroke="rgba(245,165,36,0.9)" strokeWidth={1} />
+            <rect width={lw} height={lh} rx={7} fill="rgba(11,22,34,0.88)" stroke="rgba(217,180,90,0.9)" strokeWidth={1} />
             <text x={lw / 2} y={lh / 2 + fs * 0.36} textAnchor="middle" fontSize={fs} fontWeight="600" fill="#FFF3D6" style={{ fontFamily: '"DM Sans", system-ui, sans-serif' }}>
               {label}
             </text>
@@ -451,7 +451,7 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
             {/* Content: plain text on the background, no box */}
             <div className="order-1 flex min-w-0 flex-col lg:order-2 lg:col-span-5">
               <div key={`txt-${idx}`}>
-                <p className="jx-rise-2 mb-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-[#F5A524] lg:mb-3 lg:text-[14px]">
+                <p className="jx-rise-2 mb-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-[#D9B45A] lg:mb-3 lg:text-[14px]">
                   {stop.place}
                 </p>
                 <h3 className="jx-rise-2 jx-display mb-2 line-clamp-2 text-[1.6rem] font-semibold uppercase leading-[1.02] tracking-tight text-white [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] sm:text-[2.1rem] lg:mb-5 lg:line-clamp-none lg:text-[clamp(2rem,3.4vw,3.6rem)]">
@@ -466,8 +466,8 @@ export default function InteractiveMap({ id = 'interactive-map', altId = 'itiner
               {/* Simple gold tracker: as wide as the text, fills up as the journey moves on (no numbers or text) */}
               <div className="mt-4 h-[3px] w-full max-w-lg overflow-hidden rounded-full bg-white/20 lg:mt-8" aria-hidden="true">
                 <div
-                  className="h-full rounded-full bg-[#F5A524] transition-[width] duration-700 ease-out"
-                  style={{ width: `${((idx + 1) / total) * 100}%`, boxShadow: '0 0 10px rgba(245,165,36,0.6)' }}
+                  className="h-full rounded-full bg-[#D9B45A] transition-[width] duration-700 ease-out"
+                  style={{ width: `${((idx + 1) / total) * 100}%`, boxShadow: '0 0 10px rgba(217,180,90,0.6)' }}
                 />
               </div>
             </div>

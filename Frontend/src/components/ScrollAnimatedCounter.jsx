@@ -75,7 +75,10 @@ export default function ScrollAnimatedCounter({ value, duration = 2000, classNam
       className={className}
       style={{ fontVariantNumeric: 'tabular-nums', display: 'inline-flex', alignItems: 'baseline', ...style }}
     >
-      {formatted}
+      {/* room is kept for the final number, so the text beside it does not shift while it counts up */}
+      <span style={{ display: 'inline-block', minWidth: `${(hasComma ? targetNum.toLocaleString('en-US') : String(targetNum)).length}ch`, textAlign: 'right' }}>
+        {formatted}
+      </span>
       {hasPlus && <span>+</span>}
     </span>
   );

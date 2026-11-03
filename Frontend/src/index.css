@@ -8,7 +8,7 @@
   }
 
   body {
-    background-color: #F2EFE7;
+    background-color: #FFFFFF;
     color: #172738;
     overflow-x: hidden;
   }
@@ -178,7 +178,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #F2EFE7;
+  background: #FFFFFF;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -219,13 +219,13 @@
 .application-timeline {
   --timeline-navy: #172738;
   --timeline-navy-soft: #1d2f3d;
-  --timeline-green: #3f7b67;
-  --timeline-green-soft: #dfece1;
+  --timeline-green: #2B6CB0;
+  --timeline-green-soft: #E3ECF7;
   --timeline-gold: #d3a454;
   --timeline-gold-soft: #f6e9cf;
   --timeline-ink: #2d3944;
   --timeline-border: #c8dfdb;
-  --timeline-surface: #f6f5f2;
+  --timeline-surface: #F5F8FC;
 }
 
 .application-timeline__board {
@@ -545,7 +545,7 @@
   --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --tabs-text-muted: #4E657D;
   --tabs-text-active: #172738;
-  --tabs-bar-bg: #EAE6DB;
+  --tabs-bar-bg: #E6EDF6;
   --tabs-pill-bg: #ffffff;
 }
 

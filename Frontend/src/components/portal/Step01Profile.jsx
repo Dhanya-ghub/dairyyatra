@@ -64,7 +64,7 @@ export default function Step1Profile({ formData, setFormData, errors = {} }) {
         </Field>
 
         <Field label="Age">
-          <div className="px-4 py-3 rounded-xl border border-[#C8DFDB] bg-[#F2EFE7] text-sm text-[#172738] min-h-[46px]">
+          <div className="px-4 py-3 rounded-xl border border-[#C8DFDB] bg-[#F5F8FC] text-sm text-[#172738] min-h-[46px]">
             {age !== null && age >= 0 ? `${age} years` : 'Calculated from date of birth'}
           </div>
         </Field>

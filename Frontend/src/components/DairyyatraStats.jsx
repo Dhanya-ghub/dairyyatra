@@ -91,14 +91,15 @@ export default function DairyYatraStats({ fontPreset = 'dmsans' }) {
             content: ''; position: absolute; left: 0; top: 12%; bottom: 12%; width: 1px;
             background: rgba(255, 255, 255, 0.12);
           }
-          .dy-num { font-size: 28px; min-width: 0; }
+          .dy-num { font-size: clamp(22px, 7vw, 28px); min-width: 0; }
+          .dy-unit { font-size: 0.42em; }
           .dy-label { font-size: 12px; }
           .dy-stat:hover, .dy-stat:active, .dy-stat:focus, .dy-stat.is-pop { transform: scale(1.06); }
         }
 
         .dy-stat {
           position: relative; z-index: 1;
-          flex: 1 0 auto; min-width: 120px; padding: 8px 24px; margin: 0;
+          flex: 1 1 0; min-width: 0; padding: 8px 12px; margin: 0;
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: 6px; text-align: center; cursor: pointer;
           background: transparent;            /* always transparent: default, hover, touch */
@@ -118,11 +119,12 @@ export default function DairyYatraStats({ fontPreset = 'dmsans' }) {
         }
 
         .dy-num {
-          margin: 0; order: 1; display: flex; align-items: baseline; justify-content: center; gap: 4px;
+          margin: 0; order: 1; display: flex; align-items: baseline; justify-content: center; gap: 3px;
+          white-space: nowrap;
           font-family: var(--dy-num-font);
           font-weight: var(--dy-num-weight); font-size: clamp(30px, 3.4vw, 42px); line-height: 1; letter-spacing: 0;
           font-variant-numeric: lining-nums tabular-nums; font-feature-settings: 'lnum' 1, 'tnum' 1;
-          color: #fff; min-width: 4ch; text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+          color: #fff; text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
         }
         .dy-unit { font-size: 0.45em; font-family: var(--dy-label-font); font-weight: 500; opacity: 0.9; }
         .dy-stat:nth-child(even) .dy-num { color: #FFB52E; text-shadow: 0 0 20px rgba(255, 170, 30, 0.55); }

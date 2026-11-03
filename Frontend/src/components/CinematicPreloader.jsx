@@ -111,6 +111,7 @@ export default function CinematicPreloader({ onComplete }) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     document.documentElement.classList.add('dy-intro', 'dy-intro-blur');
+    document.documentElement.classList.remove('dy-boot'); // the intro now covers the screen (see index.html)
     return () => {
       document.body.style.overflow = '';
       document.documentElement.classList.remove('dy-intro', 'dy-intro-blur');
@@ -203,7 +204,15 @@ export default function CinematicPreloader({ onComplete }) {
           willChange: 'transform, opacity, filter',
         }}
       >
-        <img key={clip.window} src={encodeURI(clip.window)} alt="" aria-hidden="true" draggable="false" style={media} />
+        {/* hidden until the swap: otherwise the finished logo flashes up while the video is still loading */}
+        <img
+          key={clip.window}
+          src={encodeURI(clip.window)}
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+          style={{ ...media, visibility: showStill ? 'visible' : 'hidden' }}
+        />
 
         <video
           ref={videoRef}

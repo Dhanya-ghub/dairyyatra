@@ -15,7 +15,7 @@ import icarLogo from '../assets/logos/trimmed/icar.png';
 
 /* Colours: same navy / cream family as the About section */
 const NAVY = '#14284B';
-const PAPER = '#FBF9F4';
+const PAPER = '#F5F8FC';
 const GOLD = '#C9A75E'; // the lines beside HOSTED BY / SUPPORTED BY / PARTNERS
 const BLUE = '#2B6CB0'; // the tier labels
 
@@ -27,15 +27,16 @@ const SUPPORTERS = [
   { name: 'ABT Foods', logo: abtLogo, url: '' },
 ];
 
+// In the order the Yatra visits them (same order as The Route)
 const PARTNERS = [
-  { name: 'NDDB Dairy Services', logo: nddbLogo, url: 'https://www.nddb.coop/node/571' },
-  { name: 'Amul', logo: amulLogo, url: 'https://amul.com/' },
-  { name: 'Progressive Dairy Farmers Association (PDFA), Punjab', logo: pdfaLogo, url: 'https://pdfapunjab.com/' },
-  { name: 'ICAR – Central Institute for Research on Buffaloes, Hisar', logo: icarLogo, url: 'https://cirb.res.in/' },
-  { name: 'Banas Dairy', logo: banasLogo, url: 'https://www.banasdairy.coop/' },
   { name: 'Akshayakalpa', logo: akshayakalpaLogo, url: 'https://akshayakalpa.org/' },
   { name: 'Gokul Dairy', logo: gokulLogo, url: 'https://www.gokulmilk.coop/' },
+  { name: 'NDDB Dairy Services', logo: nddbLogo, url: 'https://www.nddb.coop/node/571' },
+  { name: 'Amul', logo: amulLogo, url: 'https://amul.com/' },
+  { name: 'Banas Dairy', logo: banasLogo, url: 'https://www.banasdairy.coop/' },
   { name: 'ICAR – National Research Centre on Camel', logo: nrccLogo, url: 'https://nrccamel.icar.gov.in/' },
+  { name: 'ICAR – Central Institute for Research on Buffaloes, Hisar', logo: icarLogo, url: 'https://cirb.res.in/' },
+  { name: 'Progressive Dairy Farmers Association (PDFA), Punjab', logo: pdfaLogo, url: 'https://pdfapunjab.com/' },
 ];
 
 /* Every logo covers about the same area, whatever its shape: a wide logo gets shorter, a round one taller.
@@ -57,7 +58,7 @@ function Tier({ label, on, delay, className = '', children }) {
         style={{ transitionDelay: on ? `${delay}ms` : '0ms' }}
       >
         <span className="h-[2px]" style={{ background: `linear-gradient(to right, transparent, ${GOLD})` }} />
-        <span className="text-center text-[13px] font-extrabold uppercase tracking-[0.28em] sm:text-[15px]" style={{ color: BLUE }}>
+        <span className="text-center text-[16px] font-extrabold uppercase tracking-[0.28em] sm:text-[20px] lg:text-[22px]" style={{ color: BLUE }}>
           {label}
         </span>
         <span className="h-[2px]" style={{ background: `linear-gradient(to left, transparent, ${GOLD})` }} />
@@ -166,6 +167,18 @@ export default function HostOrganizations() {
           }
           .dy-ho-title { font-size: clamp(2.4rem, min(4.4vw, 7.4vh), 4.2rem) !important; }
         }
+        /* Partners zig-zag. Phones: two columns, the right one dropped half a row.
+           Wider: 9 narrow columns, each logo 2 wide; logo 1, 3, 5, 7 on the top row, 2, 4, 6, 8 below, in between. */
+        .dy-zz {
+          display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+          column-gap: 24px; row-gap: 20px; align-items: center; padding-bottom: calc(var(--logo-u) * 0.7);
+        }
+        .dy-zz > :nth-child(even) { transform: translateY(60%); }
+        @media (min-width: 640px) {
+          .dy-zz { grid-template-columns: repeat(9, minmax(0, 1fr)); column-gap: 16px; row-gap: clamp(14px, 3vh, 32px); padding-bottom: 0; }
+          .dy-zz > * { grid-column: var(--c) / span 2; grid-row: 1; }
+          .dy-zz > :nth-child(even) { grid-row: 2; transform: none; }
+        }
         .dy-ho-in   { transition: opacity 700ms ease, transform 800ms cubic-bezier(.16,1,.3,1); }
         .dy-ho-logo { transition: transform 300ms ease; }
         .dy-ho-logo:hover { transform: scale(1.05); }
@@ -202,9 +215,12 @@ export default function HostOrganizations() {
 
         {/* ---------- Row 2: Partners ---------- */}
         <Tier label="Partners" on={on} delay={650}>
-          <div className="grid grid-cols-2 items-center gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-x-8 lg:gap-x-12 lg:gap-y-[clamp(20px,4vh,44px)]">
-            {PARTNERS.map((p) => (
-              <Logo key={p.name} item={p} />
+          {/* zig-zag: logos alternate between a top and a bottom row, each half a step on from the last */}
+          <div className="dy-zz">
+            {PARTNERS.map((p, i) => (
+              <div key={p.name} style={{ '--c': i + 1 }}>
+                <Logo item={p} />
+              </div>
             ))}
           </div>
         </Tier>

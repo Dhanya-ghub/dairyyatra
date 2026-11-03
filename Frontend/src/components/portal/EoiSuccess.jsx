@@ -13,7 +13,7 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
   const { refId, formattedDate, data = {} } = submissionRecord;
 
   return (
-    <div className="min-h-screen bg-[#F2EFE7] text-[#172738] font-sans pb-20">
+    <div className="min-h-screen bg-[#F5F8FC] text-[#172738] font-sans pb-20">
       <div className="bg-[#142538] text-white py-12 px-4 border-b-4 border-[#3368A0] print:hidden">
         <div className="max-w-3xl mx-auto text-center space-y-4">
           <div className="w-16 h-16 rounded-full bg-white/10 text-[#C8DFDB] border-2 border-[#C8DFDB] flex items-center justify-center mx-auto">
@@ -65,7 +65,7 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
           </div>
         </div>
 
-        <div className="bg-[#E5E1D5]/60 p-6 rounded-2xl border border-dashed border-[#C8DFDB] flex items-start gap-4 print:hidden">
+        <div className="bg-[#E3ECF7]/60 p-6 rounded-2xl border border-dashed border-[#C8DFDB] flex items-start gap-4 print:hidden">
           <div className="w-10 h-10 rounded-xl bg-white text-[#4E657D] flex items-center justify-center flex-shrink-0">
             <Lock className="w-5 h-5" />
           </div>

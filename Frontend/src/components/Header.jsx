@@ -16,10 +16,13 @@ const NAV_LINKS = [
   { id: 'alumni', label: 'ALUMNI', href: '/#alumni' },
 ];
 
-// The PROGRAMME menu: each item opens its own page
+// The PROGRAMME menu. `page` = its own page, `download` = a file.
+// Programme Fee (/programme/fee) is hidden for now; to bring it back add
+//   { label: 'Programme Fee', href: '/programme/fee', page: 'fee' },
+// here and the '/programme/fee' entry in PAGES in main.jsx.
 const PROGRAMME_LINKS = [
   { label: 'Timeline', href: '/programme', page: 'programme' },
-  { label: 'Programme Fee', href: '/programme/fee', page: 'fee' },
+  { label: 'Brochure', href: BROCHURE_URL, download: true },
 ];
 
 // Every section on the home page, in order. Used only for the scroll highlight.
@@ -68,10 +71,12 @@ function ProgrammeMenu({ active, idleCls }) {
             <li key={l.href}>
               <a
                 href={l.href}
+                download={l.download || undefined}
+                onClick={() => setOpen(false)}
                 className="flex items-center justify-between gap-3 px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#2B6CB0]"
               >
                 {l.label}
-                <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                {l.download ? <Download className="h-3.5 w-3.5 opacity-60" /> : <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
               </a>
             </li>
           ))}
@@ -184,16 +189,6 @@ export default function Header({ page = 'home', onOpenApply }) {
 
             <span className={`h-5 w-px ${clear ? 'bg-white/30' : 'bg-slate-300'}`} aria-hidden="true" />
 
-            {/* Brochure: quiet text link, so the main button is the only filled one */}
-            <a
-              href={BROCHURE_URL}
-              download
-              className={`flex items-center gap-1.5 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors whitespace-nowrap ${linkIdle}`}
-            >
-              <Download className="w-4 h-4" />
-              <span>Brochure</span>
-            </a>
-
             {/* Primary action */}
             <button
               onClick={onOpenApply}
@@ -254,25 +249,19 @@ export default function Header({ page = 'home', onOpenApply }) {
             </a>
           ))}
 
-          <a
-            href={BROCHURE_URL}
-            download
-            className="flex items-center gap-2 text-xs font-bold tracking-[0.05em] uppercase py-2.5 text-slate-600 hover:text-[#2B6CB0] transition-colors"
-          >
-            <Download className="w-4 h-4" /> Brochure
-          </a>
-
           <div className="border-b border-slate-100 pb-2.5">
             <p className="py-2.5 text-xs font-bold uppercase tracking-[0.05em] text-slate-600">Programme</p>
             {PROGRAMME_LINKS.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
+                download={l.download || undefined}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 pl-4 text-xs font-semibold uppercase tracking-[0.05em] transition-colors ${
-                  page === l.page ? 'text-[#2B6CB0]' : 'text-slate-500 hover:text-[#2B6CB0]'
+                className={`flex items-center gap-2 py-2 pl-4 text-xs font-semibold uppercase tracking-[0.05em] transition-colors ${
+                  l.page && page === l.page ? 'text-[#2B6CB0]' : 'text-slate-500 hover:text-[#2B6CB0]'
                 }`}
               >
+                {l.download && <Download className="h-3.5 w-3.5" />}
                 {l.label}
               </a>
             ))}

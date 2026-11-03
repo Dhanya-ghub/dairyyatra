@@ -9,7 +9,7 @@ const STEPS = [
 
 export default function EoiStepper({ currentStep, maxStepReached = 1, onStepClick }) {
   return (
-    <div className="bg-[#F2EFE7] border-b border-[#C8DFDB] py-4 px-4 sm:px-6 lg:px-8 print:hidden">
+    <div className="bg-[#F5F8FC] border-b border-[#C8DFDB] py-4 px-4 sm:px-6 lg:px-8 print:hidden">
       <div className="max-w-2xl mx-auto flex items-center">
         {STEPS.map((step, idx) => {
           const isLocked = !!step.locked;

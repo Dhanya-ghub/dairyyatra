@@ -227,8 +227,10 @@ export default function ProgrammeFee({ onOpenApply }) {
           <dl className="grid gap-8 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] sm:gap-x-10">
             <dt className="font-semibold">Who can apply?</dt>
             <dd className="leading-relaxed text-slate-600">
-              Dairy Yatris seeking financial assistance can apply for scholarship support. We aim to make this learning journey
-              accessible to deserving participants.
+              Financial assistance is available to eligible participants who demonstrate a genuine need for support. The
+              scholarship programme aims to promote inclusivity and equal access to this learning opportunity, ensuring that
+              financial constraints do not become a barrier to participation. Through this initiative, deserving candidates are
+              encouraged to pursue the experience regardless of their financial circumstances.
             </dd>
 
             <dt className="font-semibold">Financial policy</dt>

@@ -36,7 +36,16 @@ function Site() {
       if (url.origin !== window.location.origin) return
       if (url.pathname.startsWith('/admin') || /\.[a-z0-9]+$/i.test(url.pathname)) return // admin and files load normally
       const samePage = pageFor(url.pathname) === pageFor(window.location.pathname)
-      if (samePage && url.hash) return // a section on this page: let the browser scroll to it
+      if (samePage && url.hash) {
+        // a section on this page: scroll to it ourselves, so it always works, even when the address
+        // already ends in that section (the browser then often does nothing). #apply is left to App.
+        const target = url.hash !== '#apply' && document.querySelector(url.hash)
+        if (!target) return
+        e.preventDefault()
+        if (window.location.hash !== url.hash) window.history.pushState({}, '', url.pathname + url.search + url.hash)
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
       e.preventDefault()
       window.history.pushState({}, '', url.pathname + url.search + url.hash)
       show()

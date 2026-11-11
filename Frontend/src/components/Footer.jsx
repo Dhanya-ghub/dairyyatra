@@ -40,6 +40,7 @@ export default function Footer({ onOpenApply }) {
                   <li><a href="/#interactive-map" className={linkCls}>The Route</a></li>
                   <li><a href="/#alumni" className={linkCls}>Fellows</a></li>
                   <li><a href="/programme" className={linkCls}>Programme Timeline</a></li>
+                  <li><a href="/programme/fee" className={linkCls}>Programme Fee</a></li>
                 </ul>
               </div>
             </ScrollReveal>

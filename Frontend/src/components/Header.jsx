@@ -17,11 +17,9 @@ const NAV_LINKS = [
 ];
 
 // The PROGRAMME menu. `page` = its own page, `download` = a file.
-// Programme Fee (/programme/fee) is hidden for now; to bring it back add
-//   { label: 'Programme Fee', href: '/programme/fee', page: 'fee' },
-// here and the '/programme/fee' entry in PAGES in main.jsx.
 const PROGRAMME_LINKS = [
   { label: 'Timeline', href: '/programme', page: 'programme' },
+  { label: 'Programme Fee', href: '/programme/fee', page: 'fee' },
   { label: 'Brochure', href: BROCHURE_URL, download: true },
 ];
 

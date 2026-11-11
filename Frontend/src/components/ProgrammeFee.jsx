@@ -5,13 +5,15 @@ import { ChevronRight } from 'lucide-react';
 const TOTAL_FEE = 100000;
 
 const LEVELS = [
-  { level: 'Level 1', payable: 90000 },
-  { level: 'Level 2', payable: 85000 },
-  { level: 'Level 3', payable: 75000 },
-  { level: 'Level 4', payable: 60000 },
+  { level: 'Level 1', payable: 95000 },
+  { level: 'Level 2', payable: 90000 },
+  { level: 'Level 3', payable: 85000 },
 ];
 
-/* Cancellation and refunds (without EMI): % of the total fee paid that is refunded */
+/* The fees a participant can have paid: the full fee and each scholarship level (used by the refund policy) */
+const FEES = [{ label: 'Full fee', amount: TOTAL_FEE }, ...LEVELS.map((l) => ({ label: `Scholarship ${l.level}`, amount: l.payable }))];
+
+/* Cancellation and refunds (without EMI): % of the fee paid that is refunded */
 const REFUNDS = [
   { period: 'Till 30 November', refund: 100 },
   { period: '1 December – 31 December', refund: 80 },
@@ -27,11 +29,15 @@ const NAVY = '#14284B';
 const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 
 /* Cancellation & refund policy.
-   Left: a ring showing the refund for the selected period (and what that means on the full fee).
-   Right: the periods; hovering or tapping one moves the ring to it. */
+   Left: pick the fee paid (full fee or a scholarship level), and a ring shows the refund for the selected period
+   with the amount refunded on that fee.
+   Right: the periods with their % and amount on the chosen fee; hovering or tapping one moves the ring to it. */
 function RefundPolicy() {
   const [sel, setSel] = useState(0);
+  const [feeIdx, setFeeIdx] = useState(0);
   const r = REFUNDS[sel];
+  const fee = FEES[feeIdx];
+  const refundOf = (pct) => Math.round((fee.amount * pct) / 100);
   const R = 74;
   const C = 2 * Math.PI * R;
 
@@ -42,7 +48,7 @@ function RefundPolicy() {
           <h2 className="text-[clamp(1.5rem,2.4vw,2rem)] font-semibold leading-tight tracking-tight">Cancellation &amp; Refund Policy</h2>
           <p className="mt-2 text-[12px] font-bold uppercase tracking-[0.18em] text-[#2B6CB0]">Payments without EMI</p>
         </div>
-        <p className="text-sm text-slate-500">Select a cancellation period to see the refund.</p>
+        <p className="text-sm text-slate-500">Choose the fee paid and a cancellation period to see the refund.</p>
       </div>
 
       <div className="mt-8 grid overflow-hidden rounded-2xl border border-slate-200 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
@@ -80,9 +86,31 @@ function RefundPolicy() {
             <p className="text-[13px] text-white/60">Cancelled</p>
             <p className="mt-0.5 text-lg font-semibold">{r.period}</p>
             <p className="mt-3 text-sm text-white/75">
-              On the full fee of {inr(TOTAL_FEE)}:{' '}
-              <span className="font-semibold text-[#D9B45A]">{inr((TOTAL_FEE * r.refund) / 100)}</span> refunded
+              On a fee of {inr(fee.amount)}:{' '}
+              <span className="font-semibold text-[#D9B45A]">{inr(refundOf(r.refund))}</span> refunded
             </p>
+
+            {/* the fee paid: full fee or a scholarship level */}
+            <div className="mt-5" role="group" aria-label="Fee paid">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/50">Fee paid</p>
+              <div className="mt-2 flex flex-wrap justify-center gap-2 sm:justify-start lg:justify-center">
+                {FEES.map((f, i) => (
+                  <button
+                    key={f.label}
+                    type="button"
+                    onClick={() => setFeeIdx(i)}
+                    aria-pressed={i === feeIdx}
+                    title={f.label}
+                    className={`rounded-full px-3 py-1.5 text-[13px] font-semibold tabular-nums transition-colors ${
+                      i === feeIdx ? 'bg-[#D9B45A] text-[#0E1B30]' : 'bg-white/10 text-white/80 hover:bg-white/20'
+                    }`}
+                  >
+                    {inr(f.amount)}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[12px] text-white/55">{fee.label}</p>
+            </div>
           </div>
         </div>
 
@@ -110,8 +138,11 @@ function RefundPolicy() {
                       <span className="block h-full rounded-full bg-[#2B6CB0]" style={{ width: `${x.refund}%`, opacity: on ? 1 : 0.45 }} />
                     </span>
                   </span>
-                  <span className={`text-xl font-semibold tabular-nums ${x.refund ? (on ? 'text-[#14284B]' : 'text-slate-700') : 'text-slate-400'}`}>
-                    {x.refund}%
+                  <span className="text-right">
+                    <span className={`block text-xl font-semibold tabular-nums ${x.refund ? (on ? 'text-[#14284B]' : 'text-slate-700') : 'text-slate-400'}`}>
+                      {x.refund}%
+                    </span>
+                    <span className="block text-[13px] tabular-nums text-slate-500">{inr(refundOf(x.refund))}</span>
                   </span>
                 </button>
               </li>
@@ -121,7 +152,8 @@ function RefundPolicy() {
       </div>
 
       <p className="mt-4 text-[13px] leading-relaxed text-slate-500">
-        The refund percentage is applied to the total fee paid and is determined by the date on which the cancellation is requested.
+        The refund percentage is applied to the fee actually paid (the full fee of {inr(TOTAL_FEE)}, or the payable amount for
+        the scholarship level awarded) and is determined by the date on which the cancellation is requested.
       </p>
     </div>
   );
@@ -149,9 +181,9 @@ export default function ProgrammeFee({ onOpenApply }) {
         </div>
 
         {/* Fee cards */}
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {/* Full fee: the highlighted card */}
-          <article className="relative isolate flex flex-col overflow-hidden rounded-xl bg-[#0E1B30] p-5 text-white shadow-[0_24px_60px_-20px_rgba(14,27,48,0.55)] sm:col-span-2 lg:col-span-1">
+          <article className="relative isolate flex flex-col overflow-hidden rounded-xl bg-[#0E1B30] p-5 text-white shadow-[0_24px_60px_-20px_rgba(14,27,48,0.55)] sm:col-span-3 lg:col-span-1">
             <div
               className="pointer-events-none absolute inset-0 -z-10"
               aria-hidden="true"

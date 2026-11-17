@@ -2,7 +2,11 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { Megaphone, UserCheck, GraduationCap, Route } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
 
-/* The 9 milestones grouped into 4 phases. Rename a phase or move a milestone by editing this list. */
+/* The 9 milestones grouped into 4 phases. Rename a phase or move a milestone by editing this list.
+   date     = text shown on the page
+   dateTime = first day it counts as happening (YYYY-MM-DD)
+   endDateTime = last day it counts as happening (leave out for a single day)
+   Done / In progress / Upcoming is worked out from today's date, nothing to change by hand. */
 const phases = [
   {
     name: 'Apply',
@@ -10,8 +14,8 @@ const phases = [
     period: 'Oct – Nov 2026',
     milestones: [
       { date: '17 October 2026', dateTime: '2026-10-17', title: 'Announcement' },
-      { date: '12 October 2026', dateTime: '2026-10-12', title: 'Expression of Interest (EOI) Opens' },
-      { date: '12 November 2026', dateTime: '2026-11-12', title: 'EOI Closes' },
+      { date: '17 October 2026', dateTime: '2026-10-17', title: 'Expression of Interest (EOI) Opens' },
+      { date: 'November', dateTime: '2026-11-01', endDateTime: '2026-11-30', title: 'EOI Closes' },
     ],
   },
   {
@@ -19,8 +23,7 @@ const phases = [
     Icon: UserCheck,
     period: 'Nov 2026',
     milestones: [
-      { date: '15 November 2026', dateTime: '2026-11-15', title: 'Cohort Selection Announcement' },
-      { date: '25 November 2026', dateTime: '2026-11-25', title: 'Payment Completion' },
+      { date: 'November', dateTime: '2026-11-01', endDateTime: '2026-11-30', title: 'Cohort Selection Announcement' },
     ],
   },
   {
@@ -58,6 +61,19 @@ const todayISO = () => {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 };
 
+/* One rule for every milestone: after its last day = done, between first and last day = active, before = upcoming */
+const msStatus = (m, today) => ((m.endDateTime || m.dateTime) < today ? 'done' : m.dateTime <= today ? 'active' : 'upcoming');
+
+/* A phase is done only when all its milestones are done, upcoming only when none has started, otherwise in progress */
+const phaseStatus = (phase, today) => {
+  const st = phase.milestones.map((m) => msStatus(m, today));
+  if (st.every((x) => x === 'done')) return 'done';
+  if (st.every((x) => x === 'upcoming')) return 'upcoming';
+  return 'active';
+};
+
+const STATUS_TEXT = { done: 'Done', active: 'In progress' };
+
 /* Desktop sizes: label row height + gap + circle, so the line runs through the circle centres */
 const LABEL_H = 28;
 const LABEL_GAP = 14;
@@ -65,33 +81,39 @@ const CIRCLE = 68;
 const LINE_Y = LABEL_H + LABEL_GAP + CIRCLE / 2;
 
 /* The milestones of one phase */
-function Milestones({ phase, color, current, today }) {
+function Milestones({ phase, color, today, upNextKey }) {
   return (
     <ul className="dy-tl-ms space-y-3">
       {phase.milestones.map((m) => {
-        const isCurrent = current?.key === m.dateTime;
-        const past = (m.endDateTime || m.dateTime) < today;
+        const status = msStatus(m, today);
+        const isActive = status === 'active';
+        const isDone = status === 'done';
+        const isUpNext = m.title === upNextKey;
         return (
-          <li key={m.dateTime} className="flex gap-2.5" aria-current={isCurrent ? 'step' : undefined}>
-            <span className="relative mt-[6px] flex h-2 w-2 shrink-0">
-              {isCurrent && <span className="absolute inline-flex h-full w-full animate-ping rounded-full" style={{ backgroundColor: color, opacity: 0.5 }} />}
+          <li key={m.title} className="flex gap-2.5" aria-current={isActive ? 'step' : undefined}>
+            {/* dot: done = solid, in progress = solid + pulse, upcoming = hollow */}
+            <span className="relative mt-[5px] flex h-2.5 w-2.5 shrink-0">
+              {isActive && <span className="absolute inline-flex h-full w-full animate-ping rounded-full" style={{ backgroundColor: color, opacity: 0.45 }} />}
               <span
-                className="relative inline-flex h-2 w-2 rounded-full border"
-                style={{ borderColor: color, backgroundColor: past || isCurrent ? color : '#FFFFFF' }}
+                className="relative inline-flex h-2.5 w-2.5 rounded-full border-2"
+                style={{
+                  borderColor: isDone || isActive ? color : '#9DB4D0',
+                  backgroundColor: isDone || isActive ? color : '#FFFFFF',
+                }}
               />
             </span>
             <div className="min-w-0">
-              <time dateTime={m.dateTime} className="block text-[11px] font-semibold uppercase tracking-wider" style={{ color }}>
+              <time dateTime={m.dateTime} className="block text-[11px] font-semibold uppercase tracking-wider" style={{ color: isDone ? `${color}99` : color }}>
                 {m.date}
               </time>
-              <div className={`text-[14px] leading-snug ${past ? 'text-[#14284B]/45' : 'text-[#33435C]'}`}>
+              <div className={`text-[14px] leading-snug ${isDone ? 'text-[#14284B]/45' : isActive ? 'font-semibold text-[#14284B]' : 'text-[#33435C]'}`}>
                 {m.title}
-                {isCurrent && (
+                {(isActive || isUpNext) && (
                   <span
                     className="ml-2 inline-block rounded-full px-2 py-[1px] align-middle text-[9px] font-bold uppercase tracking-widest text-white"
                     style={{ backgroundColor: color }}
                   >
-                    {current.isToday ? 'Today' : 'Up next'}
+                    {isActive ? 'Now' : 'Up next'}
                   </span>
                 )}
               </div>
@@ -108,14 +130,15 @@ export default function ApplicationTimeline() {
   const lineRef = useRef(null);
   const [lineOn, setLineOn] = useState(false);
 
-  // The milestone happening today, or the next one coming up
-  const current = useMemo(() => {
-    for (let pi = 0; pi < phases.length; pi += 1) {
-      const m = phases[pi].milestones.find((x) => (x.endDateTime || x.dateTime) >= today);
-      if (m) return { key: m.dateTime, phase: pi, isToday: m.dateTime <= today };
-    }
-    return null;
-  }, [today]);
+  const statuses = phases.map((p) => phaseStatus(p, today));
+  // the furthest phase that has started: the blue line grows up to it
+  const reached = Math.max(0, statuses.map((x) => x !== 'upcoming').lastIndexOf(true));
+  const anyStarted = statuses.some((x) => x !== 'upcoming');
+  // "Up next" goes on the first milestone that has not started yet
+  const upNextKey = useMemo(
+    () => phases.flatMap((p) => p.milestones).find((m) => msStatus(m, today) === 'upcoming')?.title,
+    [today]
+  );
 
   // The blue part of the line grows up to the current phase when the timeline comes into view
   useEffect(() => {
@@ -154,8 +177,8 @@ export default function ApplicationTimeline() {
     };
   }, []);
 
-  const reached = current ? current.phase : phases.length - 1; // index of the phase we're in
-  const fill = current ? `calc(${reached * 25}% + ${CIRCLE / 2}px)` : '100%';
+  const allDone = statuses.every((x) => x === 'done');
+  const fill = allDone ? '100%' : anyStarted ? `calc(${reached * 25}% + ${CIRCLE / 2}px)` : '0%';
 
   return (
     <section
@@ -213,8 +236,8 @@ export default function ApplicationTimeline() {
             {phases.map((phase, i) => {
               const color = BLUES[i];
               const { Icon } = phase;
-              const active = current?.phase === i;
-              const done = current ? i < current.phase : true;
+              const status = statuses[i];
+              const active = status === 'active';
               return (
                 <li key={phase.name} className="min-w-0">
                   <ScrollReveal animation="fade-up" duration={700} delay={150 * i}>
@@ -241,12 +264,12 @@ export default function ApplicationTimeline() {
                       <div className="pt-5 lg:pt-[clamp(10px,2vh,20px)]">
                         <div className="mb-0.5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color }}>
                           Step {i + 1}
-                          {done && <span className="tracking-normal text-[#14284B]/40">· Done</span>}
+                          {STATUS_TEXT[status] && <span className="tracking-normal text-[#14284B]/50">· {STATUS_TEXT[status]}</span>}
                         </div>
                         <h3 className="mb-4 text-[22px] font-bold leading-tight lg:mb-[clamp(8px,1.6vh,16px)]" style={{ color: NAVY }}>
                           {phase.name}
                         </h3>
-                        <Milestones phase={phase} color={color} current={current} today={today} />
+                        <Milestones phase={phase} color={color} today={today} upNextKey={upNextKey} />
                       </div>
                     </div>
                   </ScrollReveal>
@@ -262,7 +285,7 @@ export default function ApplicationTimeline() {
           {phases.map((phase, i) => {
             const color = BLUES[i];
             const { Icon } = phase;
-            const done = current ? i < current.phase : true;
+            const status = statuses[i];
             return (
               <li key={phase.name} className="relative flex gap-5">
                 <ScrollReveal animation="fade-up" duration={700} delay={100 * i}>
@@ -279,12 +302,12 @@ export default function ApplicationTimeline() {
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color }}>
                         Step {i + 1}
-                        {done && <span className="tracking-normal text-[#14284B]/40">· Done</span>}
+                        {STATUS_TEXT[status] && <span className="tracking-normal text-[#14284B]/50">· {STATUS_TEXT[status]}</span>}
                       </div>
                       <h3 className="mb-3 text-[20px] font-bold leading-tight" style={{ color: NAVY }}>
                         {phase.name}
                       </h3>
-                      <Milestones phase={phase} color={color} current={current} today={today} />
+                      <Milestones phase={phase} color={color} today={today} upNextKey={upNextKey} />
                     </div>
                   </div>
                 </ScrollReveal>

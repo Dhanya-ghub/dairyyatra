@@ -212,18 +212,22 @@ export default function Hero() {
   const ready = phase === 'ready';
 
   return (
+    /* The top padding clears BOTH the announcement strip (36px, 40px from sm up)
+       and the nav bar above it. If the strip's height changes in
+       AnnouncementBanner.jsx, change these two numbers and the logo panel's `top` below. */
     <section
       ref={sectionRef}
       id="hero"
-      className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[#1C140C] pt-16 text-[#F7F1E3]"
+      className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[#1C140C] pt-[100px] text-[#F7F1E3] sm:pt-[104px]"
     >
       <style>{STYLES}</style>
 
       {/* Kumaraguru Institutions + Environmental Defense Fund, top-left (the menu sits top-right).
           A frosted-glass panel sits behind them: it blurs the moving photos so the logos stay readable.
-          --logo-h is the base logo height; each logo is then scaled so both look the same size. */}
+          --logo-h is the base logo height; each logo is then scaled so both look the same size.
+          `top` = announcement strip height + the old 12px / 16px gap. */}
       <div
-        className="absolute left-[max(16px,2%)] top-3 z-20 transition-all duration-700 lg:top-4"
+        className="absolute left-[max(16px,2%)] top-[48px] z-20 transition-all duration-700 lg:top-[56px]"
         style={{ opacity: showLogo ? 1 : 0, transform: showLogo ? 'translateY(0)' : 'translateY(-8px)' }}
       >
         <div className="flex items-center gap-3 rounded-xl border border-white/50 bg-white/60 px-3 py-2 shadow-[0_6px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl backdrop-saturate-150 [--logo-h:26px] sm:gap-4 sm:px-4 sm:[--logo-h:30px] lg:[--logo-h:34px]">

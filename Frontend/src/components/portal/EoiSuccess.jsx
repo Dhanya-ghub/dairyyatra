@@ -57,8 +57,7 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
           <div className="text-sm text-[#4E657D] leading-relaxed">
             <h4 className="font-bold text-[#172738] mb-1">What happens next</h4>
             <p>
-              Your Expression of Interest is under review. The selected cohort will be announced on{' '}
-              <strong>15 November 2026</strong>
+              Your Expression of Interest is under review. The selected cohort will be announced shortly
               {data.email ? <> via <strong>{data.email}</strong> and</> : ' via'} WhatsApp (
               <strong>{data.whatsapp}</strong>). Only selected applicants will receive access to the next stage.
             </p>
@@ -72,9 +71,8 @@ export default function EoiSuccess({ submissionRecord, onClose }) {
           <div className="text-sm text-[#4E657D] leading-relaxed">
             <h4 className="font-bold text-[#172738] mb-1">Step 03 · Payment (Locked)</h4>
             <p>
-              This step opens only if you are selected. Selected applicants will be notified on{' '}
-              <strong>15 November 2026</strong>, and payment must be completed by{' '}
-              <strong>25 November 2026</strong>.
+              This step opens only if you are selected. Selected applicants will be
+              notified with the payment details and deadline.
             </p>
           </div>
         </div>
